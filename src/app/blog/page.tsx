@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { sanityClient } from "@/lib/sanity/client";
+import { allPostsQuery, categoriesQuery } from "@/lib/sanity/queries";
 import { BlogPageClient } from "./blog-page-client";
 
 export const metadata: Metadata = {
@@ -6,13 +8,16 @@ export const metadata: Metadata = {
   description: "Thoughts on design, creativity, and building products.",
 };
 
-// Sample data — will be replaced with Sanity queries
+// Revalidate every 60 seconds so new Sanity content appears quickly
+export const revalidate = 60;
+
+// Sample data — shown when Sanity has no posts yet
 const SAMPLE_POSTS = [
   {
     slug: "duolingo-streak-psychology",
     title: "Duolingo এর সবুজ পাখি কেন আপনাকে ছাড়ে না — Gamification Psychology",
     excerpt:
-      "কেন আমরা streak হারাতে ভয় পাই? কীভাবে Duolingo আমাদের brain এর reward system কে hack করে? একটা deep dive into behavioral design।",
+      "কেন আমরা streak হারাতে ভয় পাই? কীভাবে Duolingo আমাদের brain এর reward system কে hack করে?",
     category: "Design Psychology",
     date: "Mar 28, 2026",
     readingTime: "8 min read",
@@ -41,53 +46,9 @@ const SAMPLE_POSTS = [
     hasAudio: false,
     coverColor: "bg-[#8B6B4A]",
   },
-  {
-    slug: "micro-interactions-that-matter",
-    title: "Micro-interactions যেগুলো User Experience বদলে দেয়",
-    excerpt:
-      "ছোট ছোট animation আর feedback যেগুলো product কে alive করে তোলে। Real-world examples সহ।",
-    category: "UX Design",
-    date: "Feb 22, 2026",
-    readingTime: "7 min read",
-    hasAudio: true,
-    coverColor: "bg-[#4A3F6B]",
-  },
-  {
-    slug: "building-design-portfolio",
-    title: "আপনার Design Portfolio কেন আপনাকে job পাচ্ছে না",
-    excerpt:
-      "Portfolio review করতে গিয়ে বারবার যে mistakes দেখি — এবং কীভাবে ঠিক করবেন।",
-    category: "Career",
-    date: "Feb 10, 2026",
-    readingTime: "6 min read",
-    hasAudio: false,
-    coverColor: "bg-[#6B4A4A]",
-  },
-  {
-    slug: "color-theory-practical-guide",
-    title: "Color Theory — Designer দের জন্য Practical Guide",
-    excerpt:
-      "শুধু theory না, real project এ color কীভাবে ব্যবহার করবেন তার hands-on guide।",
-    category: "Visual Design",
-    date: "Jan 28, 2026",
-    readingTime: "10 min read",
-    hasAudio: true,
-    coverColor: "bg-[#C48A1A]",
-  },
-  {
-    slug: "design-thinking-beyond-workshop",
-    title: "Design Thinking — Workshop এর বাইরেও কাজ করে?",
-    excerpt:
-      "Design thinking কি শুধুই sticky notes আর whiteboard? নাকি এটা সত্যিকারের problem-solving framework?",
-    category: "Design Psychology",
-    date: "Jan 15, 2026",
-    readingTime: "9 min read",
-    hasAudio: false,
-    coverColor: "bg-[#2E4A6B]",
-  },
 ];
 
-const CATEGORIES = [
+const SAMPLE_CATEGORIES = [
   "Design Psychology",
   "Design System",
   "UX Design",
@@ -95,6 +56,55 @@ const CATEGORIES = [
   "Career",
 ];
 
-export default function BlogPage() {
-  return <BlogPageClient posts={SAMPLE_POSTS} categories={CATEGORIES} />;
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export default async function BlogPage() {
+  let posts;
+  let categories;
+
+  try {
+    const sanityPosts = await sanityClient.fetch(allPostsQuery);
+    const sanityCategories = await sanityClient.fetch(categoriesQuery);
+
+    if (sanityPosts && sanityPosts.length > 0) {
+      // Transform Sanity data to match our component format
+      posts = sanityPosts.map((post: {
+        slug: { current: string };
+        title: string;
+        excerpt: string;
+        category: string;
+        publishedAt: string;
+        readingTime: string;
+        audioUrl: string;
+        coverColor: string;
+      }) => ({
+        slug: post.slug.current,
+        title: post.title,
+        excerpt: post.excerpt || "",
+        category: post.category,
+        date: formatDate(post.publishedAt),
+        readingTime: post.readingTime || "5 min read",
+        hasAudio: !!post.audioUrl,
+        coverColor: post.coverColor ? `bg-[${post.coverColor}]` : "bg-bg-subtle",
+      }));
+      categories = sanityCategories.filter(Boolean);
+    } else {
+      // Fallback to sample data
+      posts = SAMPLE_POSTS;
+      categories = SAMPLE_CATEGORIES;
+    }
+  } catch {
+    // If Sanity fetch fails, use sample data
+    posts = SAMPLE_POSTS;
+    categories = SAMPLE_CATEGORIES;
+  }
+
+  return <BlogPageClient posts={posts} categories={categories} />;
 }
