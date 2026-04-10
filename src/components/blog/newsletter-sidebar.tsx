@@ -11,7 +11,7 @@ export function NewsletterSidebar() {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email) {
@@ -29,11 +29,27 @@ export function NewsletterSidebar() {
     setStatus("loading");
     setErrorMsg("");
 
-    // Will connect to Kit API
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setStatus("error");
+        setErrorMsg(data.error || "Failed to subscribe. Please try again.");
+        return;
+      }
+
       setStatus("success");
       setEmail("");
-    }, 1500);
+    } catch {
+      setStatus("error");
+      setErrorMsg("Something went wrong. Please try again.");
+    }
   };
 
   return (
