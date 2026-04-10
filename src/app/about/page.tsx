@@ -5,6 +5,7 @@ import {
   WhatIDoSection,
   JourneySection,
   MemoriesSection,
+  InspiredBySection,
   SectionLabel,
 } from "@/components/about";
 
@@ -65,8 +66,16 @@ export default function AboutPage() {
       {/* JOURNEY section */}
       <section className="px-6 pt-12 pb-16">
         <SectionLabel label="Journey" />
-        <div className="pt-12 flex justify-center">
+        <div className="pt-12">
           <JourneySection />
+        </div>
+      </section>
+
+      {/* INSPIRED BY section */}
+      <section className="px-6 pt-12 pb-16">
+        <SectionLabel label="Inspired By" />
+        <div className="pt-8">
+          <InspiredBySection />
         </div>
       </section>
 
