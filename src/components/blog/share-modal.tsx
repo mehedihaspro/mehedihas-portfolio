@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Share2, Copy, Check } from "lucide-react";
 
 interface ShareModalProps {
   title: string;
@@ -51,19 +52,16 @@ export function ShareButton({ title, url }: ShareModalProps) {
         className="w-9 h-9 rounded-lg bg-bg-subtle border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-cream transition-all"
         aria-label="Share article"
       >
-        <ShareIcon />
+        <Share2 size={15} />
       </button>
 
       {isOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 z-[999]"
             onClick={() => setIsOpen(false)}
           />
-
-          {/* Dropdown */}
-          <div className="absolute right-0 top-12 z-[1000] w-56 rounded-xl bg-bg-card border border-border shadow-modal p-2 animate-in fade-in slide-in-from-top-2">
+          <div className="absolute right-0 top-12 z-[1000] w-56 rounded-xl bg-bg-card border border-border shadow-modal p-2">
             <p className="px-3 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider">
               Share
             </p>
@@ -88,31 +86,12 @@ export function ShareButton({ title, url }: ShareModalProps) {
               onClick={copyToClipboard}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-bg-subtle hover:text-text-primary transition-colors"
             >
-              <CopyIcon />
+              {copied ? <Check size={14} /> : <Copy size={14} />}
               {copied ? "Copied!" : "Copy link"}
             </button>
           </div>
         </>
       )}
     </div>
-  );
-}
-
-function ShareIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 8v5a1 1 0 001 1h6a1 1 0 001-1V8" />
-      <polyline points="8,2 8,10" />
-      <polyline points="5.5,4.5 8,2 10.5,4.5" />
-    </svg>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <rect x="4" y="4" width="8" height="8" rx="1.5" />
-      <path d="M10 4V3a1.5 1.5 0 00-1.5-1.5H3A1.5 1.5 0 001.5 3v5.5A1.5 1.5 0 003 10h1" />
-    </svg>
   );
 }

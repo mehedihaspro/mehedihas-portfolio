@@ -1,12 +1,13 @@
 "use client";
 
+import { Sun, BookOpen, Moon, Eclipse } from "lucide-react";
 import { useTheme } from "./theme-provider";
 
 const THEME_OPTIONS = [
-  { value: "light" as const, label: "Light", icon: "☀" },
-  { value: "sepia" as const, label: "Sepia", icon: "📜" },
-  { value: "dark" as const, label: "Dark", icon: "🌙" },
-  { value: "night" as const, label: "Night", icon: "🌑" },
+  { value: "light" as const, label: "Light", Icon: Sun },
+  { value: "sepia" as const, label: "Sepia", Icon: BookOpen },
+  { value: "dark" as const, label: "Dark", Icon: Moon },
+  { value: "night" as const, label: "Night", Icon: Eclipse },
 ];
 
 export function ThemeSwitcher() {
@@ -18,15 +19,15 @@ export function ThemeSwitcher() {
         <button
           key={option.value}
           onClick={() => setTheme(option.value)}
-          className={`w-7 h-7 flex items-center justify-center rounded-md text-xs transition-all ${
+          className={`w-7 h-7 flex items-center justify-center rounded-md transition-all ${
             theme === option.value
-              ? "bg-bg-card text-text-primary shadow-xs"
+              ? "bg-bg-card text-amber shadow-xs"
               : "text-text-muted hover:text-text-secondary"
           }`}
           aria-label={`Switch to ${option.label} theme`}
           title={option.label}
         >
-          {option.icon}
+          <option.Icon size={14} strokeWidth={1.8} />
         </button>
       ))}
     </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AudioLines, ArrowRight } from "lucide-react";
 
 // Sample data — will be replaced with Sanity queries
 const FEATURED_PROJECTS = [
@@ -189,12 +190,7 @@ export default function HomePage() {
               <div className="flex items-center gap-4 min-w-0">
                 {post.hasAudio && (
                   <span className="shrink-0 w-6 h-6 rounded-full bg-highlight-bg flex items-center justify-center">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-amber">
-                      <rect x="0.5" y="3" width="1.5" height="4" rx="0.75" fill="currentColor" opacity="0.6" />
-                      <rect x="3" y="1.5" width="1.5" height="7" rx="0.75" fill="currentColor" opacity="0.8" />
-                      <rect x="5.5" y="2.5" width="1.5" height="5" rx="0.75" fill="currentColor" />
-                      <rect x="8" y="0.5" width="1.5" height="9" rx="0.75" fill="currentColor" opacity="0.6" />
-                    </svg>
+                    <AudioLines size={12} className="text-amber" />
                   </span>
                 )}
                 <div className="min-w-0">
@@ -206,19 +202,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                className="shrink-0 text-text-muted group-hover:text-amber group-hover:translate-x-0.5 transition-all"
-              >
-                <line x1="3" y1="8" x2="13" y2="8" />
-                <polyline points="9,4 13,8 9,12" />
-              </svg>
+              <ArrowRight size={16} className="shrink-0 text-text-muted group-hover:text-amber group-hover:translate-x-0.5 transition-all" />
             </Link>
           ))}
         </div>

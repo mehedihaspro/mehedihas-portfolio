@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { AudioPlayer } from "@/components/blog/audio-player";
@@ -172,18 +173,7 @@ export function BlogPostClient({ post, slug }: BlogPostClientProps) {
             href="/blog"
             className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-amber transition-colors"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            >
-              <line x1="12" y1="8" x2="4" y2="8" />
-              <polyline points="7,4 3.5,8 7,12" />
-            </svg>
+            <ArrowLeft size={16} />
             Back to all articles
           </Link>
         </div>

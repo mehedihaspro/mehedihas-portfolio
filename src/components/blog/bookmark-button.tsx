@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Bookmark } from "lucide-react";
 
 interface BookmarkButtonProps {
   slug: string;
@@ -42,17 +43,7 @@ export function BookmarkButton({ slug }: BookmarkButtonProps) {
       }`}
       aria-label={saved ? "Remove bookmark" : "Bookmark article"}
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill={saved ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      >
-        <path d="M3 2.5h10a.5.5 0 01.5.5v11.5l-5.5-3-5.5 3V3a.5.5 0 01.5-.5z" />
-      </svg>
+      <Bookmark size={15} fill={saved ? "currentColor" : "none"} />
     </button>
   );
 }

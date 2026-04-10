@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const FOOTER_LINKS = {
   Explore: [
@@ -25,11 +26,14 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link
-              href="/"
-              className="text-lg font-bold text-text-primary tracking-tight"
-            >
-              mehedihas
+            <Link href="/" className="inline-block">
+              <Image
+                src="/logo.png"
+                alt="mehedihas"
+                width={36}
+                height={36}
+                className="w-8 h-8"
+              />
             </Link>
             <p className="mt-3 text-sm text-text-muted leading-relaxed max-w-xs">
               Product Designer, Author, Content Creator & Mentor.

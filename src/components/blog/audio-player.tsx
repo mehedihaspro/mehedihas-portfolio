@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { Play, Pause, AudioLines } from "lucide-react";
 
 interface AudioPlayerProps {
   title: string;
@@ -10,7 +11,6 @@ interface AudioPlayerProps {
 export function AudioPlayer({ title, duration = "8:32" }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [totalDuration, setTotalDuration] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
 
   // Simulated playback for demo — will use real audio URL from Google TTS
@@ -28,12 +28,6 @@ export function AudioPlayer({ title, duration = "8:32" }: AudioPlayerProps) {
     return () => clearInterval(interval);
   }, [isPlaying]);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  };
-
   return (
     <div className="rounded-xl bg-bg-card border border-border p-4 md:p-5">
       <div className="flex items-center gap-4">
@@ -43,14 +37,14 @@ export function AudioPlayer({ title, duration = "8:32" }: AudioPlayerProps) {
           className="w-10 h-10 rounded-full bg-amber text-white flex items-center justify-center shrink-0 hover:bg-amber-dark transition-colors shadow-accent"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <PauseIcon /> : <PlayIcon />}
+          {isPlaying ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
         </button>
 
         {/* Info + Progress */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-2 min-w-0">
-              <AudioWaveSmall />
+              <AudioLines size={14} className="text-amber shrink-0" />
               <span className="text-[12px] font-medium text-text-primary truncate">
                 Listen to this article
               </span>
@@ -78,33 +72,5 @@ export function AudioPlayer({ title, duration = "8:32" }: AudioPlayerProps) {
         </div>
       </div>
     </div>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M4 2.5v11l9-5.5z" />
-    </svg>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-      <rect x="3" y="2" width="3.5" height="12" rx="1" />
-      <rect x="9.5" y="2" width="3.5" height="12" rx="1" />
-    </svg>
-  );
-}
-
-function AudioWaveSmall() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0 text-amber">
-      <rect x="1" y="5" width="1.5" height="4" rx="0.75" fill="currentColor" opacity="0.6" />
-      <rect x="4" y="3" width="1.5" height="8" rx="0.75" fill="currentColor" opacity="0.8" />
-      <rect x="7" y="4" width="1.5" height="6" rx="0.75" fill="currentColor" />
-      <rect x="10" y="2" width="1.5" height="10" rx="0.75" fill="currentColor" opacity="0.6" />
-    </svg>
   );
 }
