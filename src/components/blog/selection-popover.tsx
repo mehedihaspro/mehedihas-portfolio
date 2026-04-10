@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Highlighter, Copy, Share2, Volume2, Loader2 } from "lucide-react";
+import { Copy, Share2, Volume2, Loader2 } from "lucide-react";
 
 interface SelectionPopoverProps {
   onCopy: (text: string) => void;
-  onHighlight: (text: string) => void;
   onShare: (text: string) => void;
   onToast?: (msg: string) => void;
   containerSelector: string;
@@ -18,7 +17,6 @@ function detectLanguage(text: string): "BANGLA" | "ENGLISH" {
 
 export function SelectionPopover({
   onCopy,
-  onHighlight,
   onShare,
   onToast,
   containerSelector,
@@ -167,17 +165,6 @@ export function SelectionPopover({
           <Volume2 size={13} />
         )}
         Pronounce
-      </button>
-      <div className="w-px h-4 bg-white/20" />
-      <button
-        onClick={() => {
-          onHighlight(selectedText);
-          setPosition(null);
-        }}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-[7px] text-[12px] font-medium text-white hover:bg-white/10 transition-colors font-inter"
-      >
-        <Highlighter size={13} />
-        Highlight
       </button>
       <div className="w-px h-4 bg-white/20" />
       <button

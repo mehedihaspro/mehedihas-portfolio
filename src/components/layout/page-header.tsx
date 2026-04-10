@@ -15,9 +15,9 @@ export function PageHeader({
   const label = breadcrumbLabel || title;
 
   return (
-    <section className="rounded-[14px] px-6 pt-6 pb-8">
+    <section className="rounded-[14px] px-6 pt-2 pb-6">
       {/* Breadcrumb */}
-      <div className="flex flex-col mb-6">
+      <div className="flex flex-col mb-5">
         <p className="text-[16px] font-normal text-text-primary leading-[24px] font-inter mb-1">
           <Link href="/" className="hover:text-amber transition-colors">
             Home

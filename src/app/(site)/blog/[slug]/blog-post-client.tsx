@@ -15,6 +15,8 @@ import { Toast } from "@/components/blog/toast";
 import { SelectionPopover } from "@/components/blog/selection-popover";
 import { PortableTextRenderer } from "@/components/blog/portable-text-renderer";
 import { FocusModeController } from "@/components/blog/focus-mode-controller";
+import { Quiz } from "@/components/quiz";
+import type { QuizType } from "@/components/quiz";
 
 interface TocItem {
   id: string;
@@ -65,6 +67,7 @@ interface Post {
   references?: Reference[];
   factChecks?: FactCheck[];
   relatedPosts?: RelatedPost[];
+  quiz?: QuizType;
 }
 
 interface BlogPostClientProps {
@@ -97,19 +100,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
     } catch {
       showToast("Failed to copy");
     }
-  };
-
-  const handleHighlight = (text: string) => {
-    const highlights = JSON.parse(
-      localStorage.getItem("mehedihas-highlights") || "[]"
-    );
-    highlights.push({
-      text,
-      url: currentUrl,
-      timestamp: Date.now(),
-    });
-    localStorage.setItem("mehedihas-highlights", JSON.stringify(highlights));
-    showToast("Highlighted");
   };
 
   const handleShareSelection = async (text: string) => {
@@ -231,6 +221,15 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           )}
         </article>
 
+        {/* Quiz — optional, shown before related content */}
+        {post.quiz && post.quiz.enabled && (
+          <Quiz
+            quiz={post.quiz}
+            articleTitle={post.title}
+            articleUrl={currentUrl}
+          />
+        )}
+
         {/* Related content — using BlogCard */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <RelatedContent posts={post.relatedPosts} />
@@ -260,7 +259,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
       <SelectionPopover
         containerSelector="[data-article-body]"
         onCopy={handleCopy}
-        onHighlight={handleHighlight}
         onShare={handleShareSelection}
         onToast={showToast}
       />

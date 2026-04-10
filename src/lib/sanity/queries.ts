@@ -58,6 +58,7 @@ export const postBySlugQuery = groq`
     featured,
     references,
     factChecks,
+    quiz,
     "relatedPosts": relatedPosts[]->{
       _id,
       title,

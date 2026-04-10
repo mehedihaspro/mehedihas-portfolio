@@ -9,6 +9,7 @@ export const post = defineType({
     { name: "meta", title: "Metadata" },
     { name: "audio", title: "Audio" },
     { name: "references", title: "References & Fact Check" },
+    { name: "quiz", title: "Quiz" },
     { name: "related", title: "Related" },
   ],
   fields: [
@@ -499,6 +500,115 @@ export const post = defineType({
         },
       ],
       group: "references",
+    }),
+
+    // ============================================
+    // QUIZ GROUP
+    // ============================================
+    defineField({
+      name: "quiz",
+      title: "Quiz",
+      type: "object",
+      group: "quiz",
+      description:
+        "Optional end-of-article quiz. Readers can test comprehension and share their score.",
+      fields: [
+        defineField({
+          name: "enabled",
+          title: "Enable Quiz",
+          type: "boolean",
+          initialValue: false,
+        }),
+        defineField({
+          name: "title",
+          title: "Quiz Title",
+          type: "string",
+          description: "e.g. 'Test your understanding'",
+          initialValue: "Test your understanding",
+        }),
+        defineField({
+          name: "description",
+          title: "Intro Description",
+          type: "text",
+          rows: 2,
+          description: "Shown on the start card before the reader begins",
+        }),
+        defineField({
+          name: "questions",
+          title: "Questions",
+          type: "array",
+          validation: (rule) => rule.min(3).max(10),
+          of: [
+            {
+              type: "object",
+              name: "quizQuestion",
+              title: "Question",
+              fields: [
+                defineField({
+                  name: "question",
+                  title: "Question",
+                  type: "text",
+                  rows: 2,
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: "options",
+                  title: "Options",
+                  type: "array",
+                  validation: (rule) => rule.min(2).max(6),
+                  of: [
+                    {
+                      type: "object",
+                      name: "quizOption",
+                      fields: [
+                        defineField({
+                          name: "text",
+                          title: "Answer Text",
+                          type: "string",
+                          validation: (rule) => rule.required(),
+                        }),
+                        defineField({
+                          name: "correct",
+                          title: "Is correct?",
+                          type: "boolean",
+                          initialValue: false,
+                        }),
+                      ],
+                      preview: {
+                        select: { title: "text", correct: "correct" },
+                        prepare({ title, correct }) {
+                          return {
+                            title: title || "Option",
+                            subtitle: correct ? "✓ Correct" : "",
+                          };
+                        },
+                      },
+                    },
+                  ],
+                }),
+                defineField({
+                  name: "explanation",
+                  title: "Explanation",
+                  type: "text",
+                  rows: 3,
+                  description:
+                    "Shown on the results screen to explain the answer",
+                }),
+                defineField({
+                  name: "relatedSection",
+                  title: "Related Section Slug (optional)",
+                  type: "string",
+                  description:
+                    "The slug of a heading in the article (e.g. 'loss-aversion'). When the reader gets this wrong, they can jump to the related section.",
+                }),
+              ],
+              preview: {
+                select: { title: "question" },
+              },
+            },
+          ],
+        }),
+      ],
     }),
 
     // ============================================
