@@ -262,6 +262,7 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
         onCopy={handleCopy}
         onHighlight={handleHighlight}
         onShare={handleShareSelection}
+        onToast={showToast}
       />
 
       {/* Toast */}

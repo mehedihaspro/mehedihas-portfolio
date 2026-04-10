@@ -1,25 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Highlighter, Copy, Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Highlighter, Copy, Share2, Volume2, Loader2 } from "lucide-react";
 
 interface SelectionPopoverProps {
   onCopy: (text: string) => void;
   onHighlight: (text: string) => void;
   onShare: (text: string) => void;
+  onToast?: (msg: string) => void;
   containerSelector: string;
+}
+
+// Detect if text contains Bangla characters (Unicode range)
+function detectLanguage(text: string): "BANGLA" | "ENGLISH" {
+  return /[\u0980-\u09FF]/.test(text) ? "BANGLA" : "ENGLISH";
 }
 
 export function SelectionPopover({
   onCopy,
   onHighlight,
   onShare,
+  onToast,
   containerSelector,
 }: SelectionPopoverProps) {
   const [position, setPosition] = useState<{ x: number; y: number } | null>(
     null
   );
   const [selectedText, setSelectedText] = useState("");
+  const [isPronouncing, setIsPronouncing] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const handleSelection = () => {
@@ -35,7 +44,6 @@ export function SelectionPopover({
         return;
       }
 
-      // Verify selection is within the content container
       const container = document.querySelector(containerSelector);
       if (!container) {
         setPosition(null);
@@ -75,6 +83,68 @@ export function SelectionPopover({
     };
   }, [containerSelector]);
 
+  const handlePronounce = async () => {
+    if (isPronouncing || !selectedText) return;
+
+    // Google TTS has a max ~5000 char limit but for pronunciation we want short
+    if (selectedText.length > 200) {
+      onToast?.("Select a shorter phrase to pronounce");
+      return;
+    }
+
+    setIsPronouncing(true);
+    try {
+      const language = detectLanguage(selectedText);
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: selectedText,
+          voice: "female",
+          language,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        onToast?.(data.error || "Failed to pronounce");
+        setIsPronouncing(false);
+        return;
+      }
+
+      // Convert base64 to blob and play
+      const byteCharacters = atob(data.audioContent);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "audio/mp3" });
+      const url = URL.createObjectURL(blob);
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setIsPronouncing(false);
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = () => {
+        setIsPronouncing(false);
+        onToast?.("Couldn't play audio");
+      };
+      await audio.play();
+    } catch {
+      setIsPronouncing(false);
+      onToast?.("Pronunciation failed");
+    }
+  };
+
   if (!position) return null;
 
   return (
@@ -86,6 +156,19 @@ export function SelectionPopover({
         transform: "translate(-50%, -100%)",
       }}
     >
+      <button
+        onClick={handlePronounce}
+        disabled={isPronouncing}
+        className="flex items-center gap-1.5 px-3 py-2 rounded-[7px] text-[12px] font-medium text-white hover:bg-white/10 transition-colors font-inter disabled:opacity-60"
+      >
+        {isPronouncing ? (
+          <Loader2 size={13} className="animate-spin" />
+        ) : (
+          <Volume2 size={13} />
+        )}
+        Pronounce
+      </button>
+      <div className="w-px h-4 bg-white/20" />
       <button
         onClick={() => {
           onHighlight(selectedText);
