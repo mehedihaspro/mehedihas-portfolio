@@ -14,6 +14,7 @@ import {
   SkipForward,
   ChevronUp,
 } from "lucide-react";
+import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
 interface AudioPlayerProps {
   title: string;
@@ -33,6 +34,7 @@ export function AudioPlayer({
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mainPlayerRef = useRef<HTMLDivElement | null>(null);
+  const isNearFooter = useFooterVisibility();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -371,8 +373,8 @@ export function AudioPlayer({
 
       {/* ========== MINI FLOATING PLAYER (appears when scrolled past main) ========== */}
       <div
-        className={`fixed bottom-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[calc(100%-48px)] md:max-w-[560px] z-[997] pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          showMini
+        className={`fixed bottom-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[calc(100%-48px)] md:max-w-[560px] z-[996] pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          showMini && !isNearFooter
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 translate-y-6"
         }`}

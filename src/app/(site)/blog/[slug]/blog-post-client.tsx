@@ -116,7 +116,7 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
       <ReadingProgress />
       <FocusModeController />
 
-      <div className="mx-auto max-w-[820px] px-6 pt-24 pb-12">
+      <div className="mx-auto max-w-[820px] px-4 md:px-6 pt-8 md:pt-10 pb-12">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-[12px] text-text-muted font-inter">
           <Link

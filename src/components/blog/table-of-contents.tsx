@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
 interface TocItem {
   id: string;
@@ -15,6 +16,7 @@ interface TableOfContentsProps {
 export function TableOfContents({ items }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string>("");
   const [isHovered, setIsHovered] = useState(false);
+  const isNearFooter = useFooterVisibility();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -42,7 +44,11 @@ export function TableOfContents({ items }: TableOfContentsProps) {
 
   return (
     <div
-      className="fixed right-6 top-1/2 -translate-y-1/2 z-[999] hidden md:block"
+      className={`fixed right-6 top-1/2 -translate-y-1/2 z-[997] hidden md:block transition-all duration-300 ${
+        isNearFooter
+          ? "opacity-0 translate-x-4 pointer-events-none"
+          : "opacity-100 -translate-y-1/2"
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
