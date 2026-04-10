@@ -28,11 +28,11 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-block">
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="mehedihas"
-                width={36}
-                height={36}
-                className="w-8 h-8"
+                width={59}
+                height={48}
+                className="h-7 w-auto"
               />
             </Link>
             <p className="mt-3 text-sm text-text-muted leading-relaxed max-w-xs">

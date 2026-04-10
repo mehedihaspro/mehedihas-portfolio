@@ -27,11 +27,11 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="shrink-0">
           <Image
-            src="/logo.png"
+            src="/logo.svg"
             alt="mehedihas"
-            width={36}
-            height={36}
-            className="w-8 h-8"
+            width={59}
+            height={48}
+            className="h-7 w-auto"
             priority
           />
         </Link>
