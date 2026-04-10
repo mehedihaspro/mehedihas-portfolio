@@ -65,7 +65,7 @@ export default async function BlogPage() {
   // Empty state — no hardcoded posts
   if (posts.length === 0) {
     return (
-      <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
         <PageHeader title="Writing &Thinking" breadcrumbLabel="Blog" />
 
         <div className="py-20 text-center">

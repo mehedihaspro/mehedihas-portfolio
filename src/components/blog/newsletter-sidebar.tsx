@@ -52,7 +52,7 @@ export function NewsletterSidebar() {
   };
 
   return (
-    <div className="w-[416px] rounded-[18px] border border-border bg-bg p-6 flex flex-col gap-6 items-center">
+    <div className="w-full lg:w-[416px] rounded-[18px] border border-border bg-bg p-6 flex flex-col gap-6 items-center">
       <div className="flex flex-col gap-6 items-center justify-center w-full">
         {/* Subscription Form */}
         <div className="flex flex-col items-center justify-center w-full">
@@ -164,6 +164,13 @@ export function NewsletterSidebar() {
           </form>
         )}
       </div>
+
+      {/* Reassurance line — from Figma */}
+      {status !== "success" && (
+        <p className="text-[12px] font-normal text-text-secondary leading-[20px] text-center w-full font-inter">
+          Free forever. Unsubscribe anytime. No spam.
+        </p>
+      )}
 
       <Divider variant="decorative" />
     </div>

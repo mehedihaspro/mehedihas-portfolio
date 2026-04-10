@@ -51,7 +51,7 @@ export default async function WorkPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+    <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
       <PageHeader title="Selected Work" breadcrumbLabel="Work" />
 
       <section className="px-6 pb-8">

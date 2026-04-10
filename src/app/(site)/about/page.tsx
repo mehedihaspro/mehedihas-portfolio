@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+    <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
       <PageHeader title="Hey, I'm Mehedi" breadcrumbLabel="About" />
 
       {/* Hero paragraph — Inter Light 48px/62px */}

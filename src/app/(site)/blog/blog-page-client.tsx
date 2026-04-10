@@ -58,11 +58,11 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
   };
 
   return (
-    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+    <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
       <PageHeader title="Writing &Thinking" breadcrumbLabel="Blog" />
 
       {/* Filters section */}
-      <section className="px-6 mb-8">
+      <section className="px-4 md:px-6 mb-8">
         {/* Language + Category filter */}
         <LanguageFilter
           categories={categories}
@@ -94,9 +94,9 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
           </button>
         </div>
       ) : (
-        <section className="flex gap-20 items-start">
+        <section className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-start px-4 md:px-6">
           {/* Left column — blog cards */}
-          <div className="flex-1 flex flex-col gap-6 min-w-0">
+          <div className="flex-1 w-full flex flex-col gap-6 min-w-0">
             {paginatedPosts.map((post, index) => (
               <div key={post.slug}>
                 <BlogCard
@@ -115,8 +115,8 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
             ))}
           </div>
 
-          {/* Right column — newsletter sidebar */}
-          <aside className="hidden lg:block shrink-0 sticky top-20">
+          {/* Right column — newsletter sidebar (reflows below on <lg) */}
+          <aside className="w-full lg:w-auto lg:shrink-0 lg:sticky lg:top-20">
             <NewsletterSidebar />
           </aside>
         </section>
@@ -124,7 +124,7 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <section className="mt-12">
+        <section className="mt-12 px-4 md:px-6">
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

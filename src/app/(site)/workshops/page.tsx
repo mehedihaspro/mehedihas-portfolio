@@ -56,7 +56,7 @@ const PAST = [
 
 export default function WorkshopsPage() {
   return (
-    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+    <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
       <PageHeader title="Workshops & Courses" breadcrumbLabel="Workshops" />
 
       <section className="px-6 pb-8">
