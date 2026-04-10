@@ -26,17 +26,19 @@ interface BlogPageClientProps {
 
 const POSTS_PER_PAGE = 5;
 
-export function BlogPageClient({ posts }: BlogPageClientProps) {
+export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
   const [languageFilter, setLanguageFilter] = useState<"ALL" | "BANGLA" | "ENGLISH">("ALL");
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredPosts = useMemo(() => {
-    if (languageFilter === "ALL") return posts;
     return posts.filter((post) => {
       const lang = post.language?.toUpperCase() || "BANGLA";
-      return lang === languageFilter;
+      const matchesLanguage = languageFilter === "ALL" || lang === languageFilter;
+      const matchesCategory = !categoryFilter || post.category === categoryFilter;
+      return matchesLanguage && matchesCategory;
     });
-  }, [posts, languageFilter]);
+  }, [posts, languageFilter, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE));
   const paginatedPosts = filteredPosts.slice(
@@ -49,9 +51,14 @@ export function BlogPageClient({ posts }: BlogPageClientProps) {
     setCurrentPage(1);
   };
 
+  const handleCategoryChange = (cat: string | null) => {
+    setCategoryFilter(cat);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="mx-auto max-w-[1440px] px-20 py-12">
-      {/* Header section — rounded container with padding */}
+      {/* Header */}
       <section className="rounded-[14px] px-6 py-12 mb-12">
         {/* Breadcrumb */}
         <div className="flex flex-col gap-1 mb-8">
@@ -59,30 +66,48 @@ export function BlogPageClient({ posts }: BlogPageClientProps) {
             <span>Home - </span>
             <span className="text-amber">Blog</span>
           </p>
-
-          {/* Hero title — Amatica SC Bold 128px */}
           <h1 className="font-display font-bold text-[128px] leading-[128px] tracking-[-10.24px] text-[#36322d]">
             Writing &Thinking
           </h1>
         </div>
 
-        {/* Solid divider */}
         <Divider variant="solid" className="mb-8" />
 
-        {/* Language filter + filter icon */}
-        <LanguageFilter onSelect={handleLanguageChange} />
+        {/* Language + Category filter */}
+        <LanguageFilter
+          categories={categories}
+          onLanguageSelect={handleLanguageChange}
+          onCategorySelect={handleCategoryChange}
+          postCount={filteredPosts.length}
+          activeLanguage={languageFilter}
+          activeCategory={categoryFilter}
+        />
       </section>
 
-      {/* Main content area — 80px gap between columns */}
-      <section className="flex gap-20 items-start">
-        {/* Left column — blog cards */}
-        <div className="flex-1 flex flex-col gap-6 min-w-0">
-          {paginatedPosts.length === 0 ? (
-            <div className="py-20 text-center">
-              <p className="text-[16px] text-text-muted font-inter">No articles found.</p>
-            </div>
-          ) : (
-            paginatedPosts.map((post, index) => (
+      {/* Main content */}
+      {filteredPosts.length === 0 ? (
+        <div className="py-20 text-center">
+          <p className="text-[20px] font-bold text-text-primary font-inter mb-2">
+            No articles found
+          </p>
+          <p className="text-[16px] text-text-muted font-inter mb-4">
+            Try changing the language or category filter.
+          </p>
+          <button
+            onClick={() => {
+              setLanguageFilter("ALL");
+              setCategoryFilter(null);
+            }}
+            className="text-[14px] text-amber hover:text-amber-dark font-medium font-inter"
+          >
+            Reset all filters
+          </button>
+        </div>
+      ) : (
+        <section className="flex gap-20 items-start">
+          {/* Left column — blog cards */}
+          <div className="flex-1 flex flex-col gap-6 min-w-0">
+            {paginatedPosts.map((post, index) => (
               <div key={post.slug}>
                 <BlogCard
                   slug={post.slug}
@@ -97,15 +122,15 @@ export function BlogPageClient({ posts }: BlogPageClientProps) {
                   <Divider variant="solid" className="mt-6" />
                 )}
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
 
-        {/* Right column — newsletter sidebar */}
-        <aside className="hidden lg:block shrink-0 sticky top-20">
-          <NewsletterSidebar />
-        </aside>
-      </section>
+          {/* Right column — newsletter sidebar */}
+          <aside className="hidden lg:block shrink-0 sticky top-20">
+            <NewsletterSidebar />
+          </aside>
+        </section>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
