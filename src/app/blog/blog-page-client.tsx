@@ -2,9 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { BlogCard } from "@/components/blog/blog-card";
-import { CategoryFilter } from "@/components/blog/category-filter";
-import { SearchBar } from "@/components/blog/search-bar";
+import { LanguageFilter } from "@/components/blog/language-filter";
 import { NewsletterSidebar } from "@/components/blog/newsletter-sidebar";
+import { Pagination } from "@/components/blog/pagination";
+import { Divider } from "@/components/ui/divider";
 
 interface Post {
   slug: string;
@@ -15,6 +16,7 @@ interface Post {
   readingTime: string;
   hasAudio?: boolean;
   coverColor?: string;
+  language?: string;
 }
 
 interface BlogPageClientProps {
@@ -22,113 +24,98 @@ interface BlogPageClientProps {
   categories: string[];
 }
 
-export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+const POSTS_PER_PAGE = 5;
+
+export function BlogPageClient({ posts }: BlogPageClientProps) {
+  const [languageFilter, setLanguageFilter] = useState<"ALL" | "BANGLA" | "ENGLISH">("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredPosts = useMemo(() => {
+    if (languageFilter === "ALL") return posts;
     return posts.filter((post) => {
-      const matchesCategory =
-        !selectedCategory || post.category === selectedCategory;
-      const matchesSearch =
-        !searchQuery ||
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const lang = post.language?.toUpperCase() || "BANGLA";
+      return lang === languageFilter;
     });
-  }, [posts, selectedCategory, searchQuery]);
+  }, [posts, languageFilter]);
 
-  const featuredPost = filteredPosts[0];
-  const remainingPosts = filteredPosts.slice(1);
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE));
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  );
+
+  const handleLanguageChange = (lang: "ALL" | "BANGLA" | "ENGLISH") => {
+    setLanguageFilter(lang);
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 py-20">
-      {/* Header */}
-      <section className="pt-8 pb-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
-          <div>
-            <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-              Blog
-            </p>
-            <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight">
-              Writing &<br />
-              <span className="text-text-secondary">Thinking</span>
-            </h1>
-          </div>
-          <div className="w-full md:w-72">
-            <SearchBar onSearch={setSearchQuery} placeholder="Search articles..." />
-          </div>
+    <div className="mx-auto max-w-[1440px] px-20 py-12">
+      {/* Header section — rounded container with padding */}
+      <section className="rounded-[14px] px-6 py-12 mb-12">
+        {/* Breadcrumb */}
+        <div className="flex flex-col gap-1 mb-8">
+          <p className="text-[16px] font-normal text-text-primary leading-[24px] font-inter">
+            <span>Home - </span>
+            <span className="text-amber">Blog</span>
+          </p>
+
+          {/* Hero title — Amatica SC Bold 128px */}
+          <h1 className="font-display font-bold text-[128px] leading-[128px] tracking-[-10.24px] text-[#36322d]">
+            Writing &Thinking
+          </h1>
         </div>
 
-        {/* Category Filter */}
-        <CategoryFilter categories={categories} onSelect={setSelectedCategory} />
+        {/* Solid divider */}
+        <Divider variant="solid" className="mb-8" />
+
+        {/* Language filter + filter icon */}
+        <LanguageFilter onSelect={handleLanguageChange} />
       </section>
 
-      {/* Post Count */}
-      <div className="flex items-center justify-between mb-6">
-        <p className="text-[12px] text-text-muted">
-          {filteredPosts.length} article{filteredPosts.length !== 1 ? "s" : ""}
-          {selectedCategory && (
-            <span>
-              {" "}in <span className="text-amber font-medium">{selectedCategory}</span>
-            </span>
-          )}
-        </p>
-        {(selectedCategory || searchQuery) && (
-          <button
-            onClick={() => {
-              setSelectedCategory(null);
-              setSearchQuery("");
-            }}
-            className="text-[12px] text-amber hover:text-amber-dark font-medium transition-colors"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-
-      {filteredPosts.length === 0 ? (
-        <div className="py-20 text-center">
-          <p className="text-lg text-text-muted">No articles found.</p>
-          <p className="text-sm text-text-muted mt-2">
-            Try a different search or category.
-          </p>
-        </div>
-      ) : (
-        <div className="flex gap-10">
-          {/* Main content */}
-          <div className="flex-1 min-w-0">
-            {/* Featured Post */}
-            {featuredPost && (
-              <section className="mb-2">
-                <BlogCard {...featuredPost} featured />
-              </section>
-            )}
-
-            {/* Divider */}
-            {remainingPosts.length > 0 && (
-              <div className="flex items-center gap-3 my-6">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-[10px] text-text-muted uppercase tracking-widest font-medium">More articles</span>
-                <div className="h-px flex-1 bg-border" />
+      {/* Main content area — 80px gap between columns */}
+      <section className="flex gap-20 items-start">
+        {/* Left column — blog cards */}
+        <div className="flex-1 flex flex-col gap-6 min-w-0">
+          {paginatedPosts.length === 0 ? (
+            <div className="py-20 text-center">
+              <p className="text-[16px] text-text-muted font-inter">No articles found.</p>
+            </div>
+          ) : (
+            paginatedPosts.map((post, index) => (
+              <div key={post.slug}>
+                <BlogCard
+                  slug={post.slug}
+                  title={post.title}
+                  excerpt={post.excerpt}
+                  category={post.category}
+                  date={post.date}
+                  readingTime={post.readingTime}
+                  hasAudio={post.hasAudio}
+                />
+                {index < paginatedPosts.length - 1 && (
+                  <Divider variant="solid" className="mt-6" />
+                )}
               </div>
-            )}
-
-            {/* Remaining Posts — list style */}
-            {remainingPosts.length > 0 && (
-              <section>
-                {remainingPosts.map((post) => (
-                  <BlogCard key={post.slug} {...post} />
-                ))}
-              </section>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <aside className="hidden lg:block w-[300px] shrink-0 pt-2">
-            <NewsletterSidebar />
-          </aside>
+            ))
+          )}
         </div>
+
+        {/* Right column — newsletter sidebar */}
+        <aside className="hidden lg:block shrink-0 sticky top-20">
+          <NewsletterSidebar />
+        </aside>
+      </section>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <section className="mt-12">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </section>
       )}
     </div>
   );

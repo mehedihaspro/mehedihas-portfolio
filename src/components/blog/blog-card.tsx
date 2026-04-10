@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { AudioLines, Clock, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { AudioLines } from "lucide-react";
 
 interface BlogCardProps {
   slug: string;
@@ -9,8 +10,7 @@ interface BlogCardProps {
   date: string;
   readingTime: string;
   hasAudio?: boolean;
-  featured?: boolean;
-  coverColor?: string;
+  coverImage?: string;
 }
 
 export function BlogCard({
@@ -21,95 +21,59 @@ export function BlogCard({
   date,
   readingTime,
   hasAudio = false,
-  featured = false,
+  coverImage,
 }: BlogCardProps) {
-  if (featured) {
-    return (
-      <Link href={`/blog/${slug}`} className="group block">
-        <article className="rounded-2xl bg-bg-card border border-border p-6 md:p-8 hover:shadow-md transition-all duration-300">
-          {/* Meta row */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-semibold text-amber uppercase tracking-[0.12em]">
-              {category}
-            </span>
-            <span className="w-1 h-1 rounded-full bg-text-muted" />
-            <span className="text-[12px] text-text-muted">{date}</span>
-            <span className="w-1 h-1 rounded-full bg-text-muted" />
-            <span className="text-[12px] text-text-muted inline-flex items-center gap-1">
-              <Clock size={11} />
-              {readingTime}
-            </span>
-            {hasAudio && (
-              <>
-                <span className="w-1 h-1 rounded-full bg-amber" />
-                <span className="text-[12px] text-amber inline-flex items-center gap-1 font-medium">
-                  <AudioLines size={11} />
-                  Audio
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Title */}
-          <h2 className="text-[28px] md:text-[34px] font-bold text-text-primary leading-[1.15] tracking-tight mb-4 group-hover:text-amber transition-colors duration-200">
-            {title}
-          </h2>
-
-          {/* Excerpt */}
-          <p className="text-[16px] text-text-secondary leading-[1.7] mb-5 line-clamp-3 max-w-2xl">
-            {excerpt}
-          </p>
-
-          {/* Read more */}
-          <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-amber group-hover:gap-2.5 transition-all duration-200">
-            Read article
-            <ArrowRight size={14} />
-          </span>
-        </article>
-      </Link>
-    );
-  }
-
   return (
     <Link href={`/blog/${slug}`} className="group block">
-      <article className="py-6 border-b border-border group-last:border-b-0 hover:bg-bg-card -mx-4 px-4 rounded-xl transition-all duration-200">
-        {/* Meta row */}
-        <div className="flex items-center gap-2.5 mb-2.5">
-          <span className="text-[11px] font-semibold text-amber uppercase tracking-[0.12em]">
-            {category}
-          </span>
-          <span className="w-1 h-1 rounded-full bg-text-muted" />
-          <span className="text-[11px] text-text-muted">{date}</span>
+      <article className="flex gap-6 items-center">
+        {/* Image — 308x308 square with 14px radius */}
+        <div className="w-[308px] h-[308px] shrink-0 rounded-[14px] bg-cream border border-border overflow-hidden relative">
+          {coverImage ? (
+            <Image
+              src={coverImage}
+              alt={title}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Image
+                src="/logo.svg"
+                alt=""
+                width={64}
+                height={52}
+                className="opacity-20"
+              />
+            </div>
+          )}
+
+          {/* Audio badge */}
           {hasAudio && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-amber" />
-              <span className="text-[11px] text-amber inline-flex items-center gap-1 font-medium">
-                <AudioLines size={10} />
+            <div className="absolute top-3 left-3 flex items-center gap-2 px-4 py-2 rounded-full bg-bg border border-border">
+              <AudioLines size={16} className="text-text-secondary" />
+              <span className="text-[12px] font-medium text-text-secondary leading-[18px]">
                 Audio
               </span>
-            </>
+            </div>
           )}
         </div>
 
-        {/* Title */}
-        <h3 className="text-[20px] font-bold text-text-primary leading-[1.25] mb-2 group-hover:text-amber transition-colors duration-200">
-          {title}
-        </h3>
+        {/* Article content */}
+        <div className="flex-1 flex flex-col gap-4 justify-center min-w-0">
+          {/* Meta: Category · Date · Reading time */}
+          <p className="text-[12px] font-medium text-text-secondary leading-[18px] truncate">
+            {category}  ·  {date}  ·  {readingTime}
+          </p>
 
-        {/* Excerpt */}
-        <p className="text-[14px] text-text-secondary leading-[1.65] line-clamp-2 mb-3 max-w-xl">
-          {excerpt}
-        </p>
+          {/* Title — Inter Bold 27px/38px */}
+          <h2 className="text-[27px] font-bold text-text-primary leading-[38px] group-hover:text-amber transition-colors duration-200 font-inter">
+            {title}
+          </h2>
 
-        {/* Footer */}
-        <div className="flex items-center gap-3 text-[11px] text-text-muted">
-          <span className="inline-flex items-center gap-1">
-            <Clock size={11} />
-            {readingTime}
-          </span>
-          <span className="inline-flex items-center gap-1 text-amber opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            Read <ArrowRight size={11} />
-          </span>
+          {/* Excerpt — Inter Regular 16px/25.88px, 3 line clamp */}
+          <p className="text-[16px] font-normal text-text-secondary leading-[25.88px] line-clamp-3 font-inter">
+            {excerpt}
+          </p>
         </div>
       </article>
     </Link>

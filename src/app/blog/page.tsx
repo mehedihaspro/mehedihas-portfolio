@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { sanityClient } from "@/lib/sanity/client";
 import { allPostsQuery, categoriesQuery } from "@/lib/sanity/queries";
 import { BlogPageClient } from "./blog-page-client";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -11,10 +11,47 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
+// Demo content — shown when Sanity is empty
+const DEMO_POSTS = [
+  {
+    slug: "duolingo-streak-psychology",
+    title: "Duolingo এর সবুজ পাখি কেন আপনাকে ছাড়ে না",
+    excerpt:
+      'Duolingo র সবুজ পাখিটা আপনাকে প্রতিদিন মনে করিয়ে দেয়, "আজ পড়াশোনা হয়নি।" কিন্তু এই innocent reminder এর পেছনে loss aversion, Zeigarnik Effect, আর guilt-driven design এর একটা পুরো system কাজ করছে।',
+    category: "UX Psychology",
+    date: "March 28, 2026",
+    readingTime: "8 min read",
+    hasAudio: true,
+    language: "BANGLA",
+  },
+  {
+    slug: "figma-variables-design-system",
+    title: "Duolingo এর সবুজ পাখি কেন আপনাকে ছাড়ে না",
+    excerpt:
+      'Duolingo র সবুজ পাখিটা আপনাকে প্রতিদিন মনে করিয়ে দেয়, "আজ পড়াশোনা হয়নি।" কিন্তু এই innocent reminder এর পেছনে loss aversion, Zeigarnik Effect, আর guilt-driven design এর একটা পুরো system কাজ করছে।',
+    category: "UX Psychology",
+    date: "March 28, 2026",
+    readingTime: "8 min read",
+    hasAudio: true,
+    language: "BANGLA",
+  },
+  {
+    slug: "designers-should-write",
+    title: "Duolingo এর সবুজ পাখি কেন আপনাকে ছাড়ে না",
+    excerpt:
+      'Duolingo র সবুজ পাখিটা আপনাকে প্রতিদিন মনে করিয়ে দেয়, "আজ পড়াশোনা হয়নি।" কিন্তু এই innocent reminder এর পেছনে loss aversion, Zeigarnik Effect, আর guilt-driven design এর একটা পুরো system কাজ করছে।',
+    category: "UX Psychology",
+    date: "March 28, 2026",
+    readingTime: "8 min read",
+    hasAudio: true,
+    language: "BANGLA",
+  },
+];
+
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
-    month: "short",
+    month: "long",
     day: "numeric",
     year: "numeric",
   });
@@ -29,63 +66,42 @@ export default async function BlogPage() {
     const sanityCategories = await sanityClient.fetch(categoriesQuery);
 
     if (sanityPosts && sanityPosts.length > 0) {
-      posts = sanityPosts.map((post: {
-        slug: { current: string };
-        title: string;
-        excerpt: string;
-        category: string;
-        publishedAt: string;
-        readingTime: string;
-        audioUrl: string;
-        coverColor: string;
-      }) => ({
-        slug: post.slug.current,
-        title: post.title,
-        excerpt: post.excerpt || "",
-        category: post.category,
-        date: formatDate(post.publishedAt),
-        readingTime: post.readingTime || "5 min read",
-        hasAudio: !!post.audioUrl,
-        coverColor: post.coverColor ? `bg-[${post.coverColor}]` : "bg-bg-subtle",
-      }));
+      posts = sanityPosts.map(
+        (post: {
+          slug: { current: string };
+          title: string;
+          excerpt: string;
+          category: string;
+          publishedAt: string;
+          readingTime: string;
+          audioUrl: string;
+          coverColor: string;
+        }) => ({
+          slug: post.slug.current,
+          title: post.title,
+          excerpt: post.excerpt || "",
+          category: post.category,
+          date: formatDate(post.publishedAt),
+          readingTime: post.readingTime || "5 min read",
+          hasAudio: !!post.audioUrl,
+          coverColor: post.coverColor
+            ? `bg-[${post.coverColor}]`
+            : "bg-bg-subtle",
+          language: "BANGLA",
+        })
+      );
       categories = (sanityCategories || []).filter(Boolean);
     }
   } catch {
     // Sanity fetch failed
   }
 
-  if (posts.length === 0) {
-    return (
-      <div className="mx-auto max-w-[1200px] px-6 py-20">
-        <section className="pt-8 pb-10">
-          <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-            Blog
-          </p>
-          <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight">
-            Writing &<br />
-            <span className="text-text-secondary">Thinking</span>
-          </h1>
-        </section>
+  // Use demo content if no Sanity posts
+  const displayPosts = posts.length > 0 ? posts : DEMO_POSTS;
+  const displayCategories =
+    categories.length > 0
+      ? categories
+      : ["UX Psychology", "Design System", "Career"];
 
-        <div className="py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-bg-subtle border border-border flex items-center justify-center mx-auto mb-4">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-text-muted">
-              <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-text-primary mb-2">
-            No posts yet
-          </h3>
-          <p className="text-sm text-text-secondary max-w-sm mx-auto mb-6">
-            Articles will appear here once published in{" "}
-            <Link href="/studio" className="text-amber hover:text-amber-dark font-medium">
-              Sanity Studio
-            </Link>.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return <BlogPageClient posts={posts} categories={categories} />;
+  return <BlogPageClient posts={displayPosts} categories={displayCategories} />;
 }

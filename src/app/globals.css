@@ -39,8 +39,12 @@
   --color-ink-soft: var(--ink-soft);
   --color-accent: var(--accent);
 
-  /* Font Family */
-  --font-body: "Hind Siliguri", sans-serif;
+  /* Font Families */
+  --font-inter: var(--font-inter), "Inter", sans-serif;
+  --font-bangla: var(--font-bangla), "Hind Siliguri", sans-serif;
+  --font-display: var(--font-display), "Amatica SC", cursive;
+  --font-handwriting: var(--font-handwriting), "Caveat", cursive;
+  --font-body: var(--font-inter), "Inter", sans-serif;
 
   /* Font Sizes */
   --text-xs: 0.6875rem;    /* 11px */
