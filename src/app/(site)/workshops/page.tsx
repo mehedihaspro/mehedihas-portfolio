@@ -152,13 +152,13 @@ export default function WorkshopsPage() {
           Don&apos;t miss the next one
         </h3>
         <p className="text-sm text-text-secondary mb-5">
-          Subscribe to get notified about upcoming workshops.
+          Get in touch to stay updated about upcoming workshops.
         </p>
         <Link
-          href="/newsletter"
+          href="/contact"
           className="h-10 px-6 inline-flex items-center justify-center rounded-xl bg-text-primary text-bg text-sm font-semibold hover:opacity-90 transition-opacity"
         >
-          Subscribe to newsletter
+          Get in touch
         </Link>
       </section>
     </div>
