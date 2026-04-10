@@ -68,7 +68,7 @@ export function NewsletterSidebar() {
               <h3 className="font-display text-[36px] font-bold leading-[44px] tracking-[-2.88px]">
                 A weekly design note
               </h3>
-              <p className="font-handwriting text-[14px] font-normal leading-[20px]">
+              <p className="font-handwriting text-[18px] font-normal leading-[24px]">
                 A research driven article for Designers
               </p>
             </div>
