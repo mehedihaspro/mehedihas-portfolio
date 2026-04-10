@@ -1,13 +1,19 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share2, Headphones } from "lucide-react";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { AudioPlayer } from "@/components/blog/audio-player";
-import { ShareButton } from "@/components/blog/share-modal";
+import { ShareModal } from "@/components/blog/share-modal";
 import { ReadingSettings } from "@/components/blog/reading-settings";
-import { BookmarkButton } from "@/components/blog/bookmark-button";
+import { ReferencesSection } from "@/components/blog/references-section";
+import { FactCheckSection } from "@/components/blog/fact-check-section";
+import { RelatedContent } from "@/components/blog/related-content";
+import { Toast } from "@/components/blog/toast";
+import { SelectionPopover } from "@/components/blog/selection-popover";
+import { PortableTextRenderer } from "@/components/blog/portable-text-renderer";
 
 interface TocItem {
   id: string;
@@ -15,23 +21,46 @@ interface TocItem {
   level: number;
 }
 
-interface Section {
-  id: string;
-  heading: string;
-  content: string;
+interface Reference {
+  title: string;
+  author?: string;
+  url?: string;
+  publication?: string;
+  year?: string;
+}
+
+interface FactCheck {
+  claim: string;
+  status: "verified" | "partial" | "context" | "disputed";
+  source?: string;
+  note?: string;
+}
+
+interface RelatedPost {
+  slug: { current: string } | string;
+  title: string;
+  excerpt?: string;
+  category?: string;
+  readingTime?: string;
+  coverColor?: string;
 }
 
 interface Post {
   title: string;
+  summary?: string;
   category: string;
   date: string;
   readingTime: string;
   author: string;
   hasAudio: boolean;
-  audioDuration: string;
-  coverColor: string;
+  audioDuration?: string;
+  language?: string;
   tocItems: TocItem[];
-  sections: Section[];
+  body: unknown[];
+  plainText: string; // for TTS
+  references?: Reference[];
+  factChecks?: FactCheck[];
+  relatedPosts?: RelatedPost[];
 }
 
 interface BlogPostClientProps {
@@ -39,14 +68,61 @@ interface BlogPostClientProps {
   slug: string;
 }
 
-export function BlogPostClient({ post, slug }: BlogPostClientProps) {
+export function BlogPostClient({ post }: BlogPostClientProps) {
+  const [toast, setToast] = useState<{ message: string; show: boolean }>({
+    message: "",
+    show: false,
+  });
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareSelection, setShareSelection] = useState<string | undefined>();
+  const [audioOpen, setAudioOpen] = useState(false);
+
+  const showToast = (message: string) => {
+    setToast({ message, show: true });
+  };
+
+  const hideToast = () => setToast({ message: "", show: false });
+
+  const currentUrl = useMemo(() => {
+    if (typeof window !== "undefined") return window.location.href;
+    return "";
+  }, []);
+
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("Copied to clipboard");
+    } catch {
+      showToast("Failed to copy");
+    }
+  };
+
+  const handleHighlight = (text: string) => {
+    // Save highlight to localStorage for persistence
+    const highlights = JSON.parse(
+      localStorage.getItem("mehedihas-highlights") || "[]"
+    );
+    highlights.push({
+      text,
+      url: currentUrl,
+      timestamp: Date.now(),
+    });
+    localStorage.setItem("mehedihas-highlights", JSON.stringify(highlights));
+    showToast("Highlighted");
+  };
+
+  const handleShareSelection = (text: string) => {
+    setShareSelection(text);
+    setShareOpen(true);
+  };
+
   return (
     <>
       <ReadingProgress />
 
-      <div className="mx-auto max-w-[1200px] px-6 py-8">
+      <div className="mx-auto max-w-[820px] px-6 pt-24 pb-12">
         {/* Breadcrumb */}
-        <nav className="mb-8 flex items-center gap-2 text-[12px] text-text-muted">
+        <nav className="mb-6 flex items-center gap-2 text-[12px] text-text-muted font-inter">
           <Link
             href="/blog"
             className="hover:text-text-primary transition-colors"
@@ -57,127 +133,165 @@ export function BlogPostClient({ post, slug }: BlogPostClientProps) {
           <span className="text-amber">{post.category}</span>
         </nav>
 
-        {/* Article Header */}
-        <header className="max-w-[820px] mb-10">
-          <span className="inline-block text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
+        {/* Category chip */}
+        <div className="flex items-center gap-2 mb-7">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-subtle border border-border text-[13px] font-semibold uppercase tracking-[0.3px] text-text-secondary font-inter">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
             {post.category}
           </span>
-          <h1 className="text-3xl md:text-[42px] font-bold text-text-primary leading-[1.15] tracking-tight mb-5">
-            {post.title}
-          </h1>
-          <div className="flex items-center gap-4 text-[13px] text-text-muted">
-            <span className="font-medium text-text-secondary">
-              {post.author}
-            </span>
-            <span>&middot;</span>
-            <span>{post.date}</span>
-            <span>&middot;</span>
-            <span>{post.readingTime}</span>
-          </div>
-        </header>
+        </div>
 
-        {/* Cover Image */}
-        <div
-          className={`w-full max-w-[820px] aspect-[2.2/1] rounded-2xl ${post.coverColor} mb-10`}
-        />
+        {/* Title */}
+        <h1 className="text-[clamp(32px,5.5vw,50px)] font-bold text-text-primary leading-[1.25] tracking-[-0.5px] mb-6 font-inter">
+          {post.title}
+        </h1>
 
-        {/* Toolbar: Actions */}
-        <div className="max-w-[820px] flex items-center justify-between mb-8 pb-6 border-b border-border">
-          {/* Audio Player */}
-          {post.hasAudio && (
-            <div className="flex-1 max-w-md">
-              <AudioPlayer
-                title={post.title}
-                duration={post.audioDuration}
-              />
+        {/* Summary with amber left bar */}
+        {post.summary && (
+          <p className="text-[19px] leading-[1.8] text-text-secondary border-l-[3px] border-amber pl-5 max-w-[680px] mb-8 font-inter">
+            {post.summary}
+          </p>
+        )}
+
+        {/* Meta bar */}
+        <div className="flex items-center justify-between gap-4 pb-8 mb-8 border-b border-border flex-wrap">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full bg-bg-subtle border border-border" />
+            <div className="flex flex-col">
+              <span className="text-[15px] font-bold text-text-primary font-inter">
+                {post.author}
+              </span>
+              <div className="flex items-center gap-2 text-[13px] text-text-muted font-inter">
+                <span>{post.date}</span>
+                <span className="w-[3px] h-[3px] rounded-full bg-text-muted" />
+                <span>{post.readingTime}</span>
+              </div>
             </div>
-          )}
+          </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 ml-auto">
-            <ReadingSettings />
-            <BookmarkButton slug={slug} />
-            <ShareButton
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {post.hasAudio && (
+              <button
+                onClick={() => setAudioOpen(!audioOpen)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[12px] font-medium transition-all font-inter ${
+                  audioOpen
+                    ? "border-amber bg-highlight-bg text-amber"
+                    : "border-border text-text-secondary hover:border-amber hover:text-amber"
+                }`}
+                aria-label="Toggle audio player"
+              >
+                <Headphones size={14} />
+                Listen
+              </button>
+            )}
+            <button
+              onClick={() => {
+                setShareSelection(undefined);
+                setShareOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-[12px] font-medium text-text-secondary hover:border-amber hover:text-amber transition-all font-inter"
+              aria-label="Share article"
+            >
+              <Share2 size={14} />
+              Share
+            </button>
+          </div>
+        </div>
+
+        {/* Audio player (expandable) */}
+        {audioOpen && post.hasAudio && (
+          <div className="mb-8 animate-in slide-in-from-top-2 fade-in duration-300">
+            <AudioPlayer
               title={post.title}
-              url={typeof window !== "undefined" ? window.location.href : ""}
+              articleText={post.plainText}
+              language={post.language}
+              onClose={() => setAudioOpen(false)}
             />
           </div>
-        </div>
+        )}
 
-        {/* Content Area: TOC sidebar + Article */}
-        <div className="flex gap-12 max-w-[1100px]">
-          {/* Main Article */}
-          <article className="flex-1 max-w-[680px]">
-            <div
-              data-article-body
-              className="text-[18px] leading-[1.8] text-text-primary"
-            >
-              {post.sections.map((section) => (
-                <section key={section.id} className="mb-10">
-                  <h2
-                    id={section.id}
-                    className="text-[27px] font-bold text-text-primary leading-tight mb-4 scroll-mt-20"
-                  >
-                    {section.heading}
-                  </h2>
-                  {section.content.split("\n\n").map((paragraph, i) => (
-                    <p
-                      key={i}
-                      className="mb-4 text-text-secondary leading-[inherit]"
-                    >
-                      {paragraph}
-                    </p>
-                  ))}
-                </section>
-              ))}
-            </div>
+        {/* Article body */}
+        <article>
+          <div
+            data-article-body
+            className="max-w-[680px] mx-auto text-[18px] leading-[1.95] text-text-primary"
+          >
+            <PortableTextRenderer value={post.body} />
+          </div>
 
-            {/* Article Footer */}
-            <footer className="mt-12 pt-8 border-t border-border">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-bg-subtle border border-border" />
-                  <div>
-                    <p className="text-sm font-semibold text-text-primary">
-                      {post.author}
-                    </p>
-                    <p className="text-[12px] text-text-muted">
-                      Product Designer & Author
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookmarkButton slug={slug} />
-                  <ShareButton
-                    title={post.title}
-                    url={
-                      typeof window !== "undefined"
-                        ? window.location.href
-                        : ""
-                    }
-                  />
-                </div>
-              </div>
-            </footer>
-          </article>
+          {/* References */}
+          {post.references && post.references.length > 0 && (
+            <ReferencesSection references={post.references} />
+          )}
 
-          {/* Sidebar: Table of Contents */}
-          <aside className="hidden lg:block w-56 shrink-0">
-            <TableOfContents items={post.tocItems} />
-          </aside>
-        </div>
+          {/* Fact Check Report */}
+          {post.factChecks && post.factChecks.length > 0 && (
+            <FactCheckSection factChecks={post.factChecks} />
+          )}
+        </article>
 
-        {/* Back to Blog */}
+        {/* Related content */}
+        {post.relatedPosts && post.relatedPosts.length > 0 && (
+          <RelatedContent
+            posts={post.relatedPosts.map((p) => ({
+              slug: typeof p.slug === "string" ? p.slug : p.slug.current,
+              title: p.title,
+              excerpt: p.excerpt,
+              category: p.category,
+              readingTime: p.readingTime,
+              coverColor: p.coverColor,
+            }))}
+          />
+        )}
+
+        {/* Back to blog */}
         <div className="mt-16 pt-8 border-t border-border">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-amber transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-amber transition-colors font-inter"
           >
             <ArrowLeft size={16} />
             Back to all articles
           </Link>
         </div>
       </div>
+
+      {/* Table of Contents (floating) */}
+      {post.tocItems && post.tocItems.length > 0 && (
+        <TableOfContents items={post.tocItems} />
+      )}
+
+      {/* Reading settings FAB */}
+      <ReadingSettings />
+
+      {/* Share modal */}
+      <ShareModal
+        isOpen={shareOpen}
+        onClose={() => {
+          setShareOpen(false);
+          setShareSelection(undefined);
+        }}
+        title={post.title}
+        url={currentUrl}
+        selectedText={shareSelection}
+        onToast={showToast}
+      />
+
+      {/* Selection popover */}
+      <SelectionPopover
+        containerSelector="[data-article-body]"
+        onCopy={handleCopy}
+        onHighlight={handleHighlight}
+        onShare={handleShareSelection}
+      />
+
+      {/* Toast */}
+      <Toast
+        message={toast.message}
+        show={toast.show}
+        onHide={hideToast}
+      />
     </>
   );
 }

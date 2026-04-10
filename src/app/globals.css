@@ -319,10 +319,24 @@ input, textarea, button, a, [role="button"] {
   transition-timing-function: ease;
 }
 
-/* Selection */
+/* Selection — amber highlight */
 ::selection {
-  background: var(--highlight-bg);
+  background: rgba(232, 168, 50, 0.25);
   color: var(--text-primary);
+}
+::-moz-selection {
+  background: rgba(232, 168, 50, 0.25);
+  color: var(--text-primary);
+}
+
+/* Focus mode — only active paragraph stays opaque */
+body.focus-mode [data-article-body] > * {
+  opacity: 0.15;
+  transition: opacity 0.4s ease;
+}
+body.focus-mode [data-article-body] > *:hover,
+body.focus-mode [data-article-body] > *:focus-within {
+  opacity: 1;
 }
 
 /* Scrollbar (webkit) */

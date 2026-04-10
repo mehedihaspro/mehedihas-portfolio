@@ -42,17 +42,33 @@ export const postBySlugQuery = groq`
     title,
     slug,
     excerpt,
+    summary,
     category,
     tags,
+    language,
     coverImage,
     coverColor,
     body,
     readingTime,
-    audioUrl,
+    enableAudio,
+    audioUrlFemale,
+    audioUrlMale,
     audioDuration,
-    series,
     publishedAt,
-    featured
+    featured,
+    references,
+    factChecks,
+    "relatedPosts": relatedPosts[]->{
+      _id,
+      title,
+      slug,
+      excerpt,
+      category,
+      publishedAt,
+      readingTime,
+      coverColor,
+      language
+    }
   }
 `;
 

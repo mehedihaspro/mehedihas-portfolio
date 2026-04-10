@@ -19,57 +19,47 @@ function formatDate(dateString: string): string {
   });
 }
 
-function extractTocFromBody(body: Array<{ _type: string; style?: string; _key: string; children?: Array<{ text: string }> }>) {
+interface Block {
+  _type: string;
+  style?: string;
+  _key: string;
+  children?: Array<{ text: string }>;
+}
+
+function extractTocFromBody(body: Block[]) {
   if (!body) return [];
   return body
-    .filter((block) => block._type === "block" && (block.style === "h2" || block.style === "h3"))
+    .filter(
+      (block) =>
+        block._type === "block" && (block.style === "h2" || block.style === "h3")
+    )
     .map((block) => ({
-      id: block._key,
+      id: slugify(block.children?.map((c) => c.text).join("") || ""),
       text: block.children?.map((c) => c.text).join("") || "",
       level: block.style === "h3" ? 3 : 2,
     }));
 }
 
-function extractSectionsFromBody(body: Array<{ _type: string; style?: string; _key: string; children?: Array<{ text: string }> }>) {
-  if (!body) return [];
-
-  const sections: Array<{ id: string; heading: string; content: string }> = [];
-  let currentSection: { id: string; heading: string; paragraphs: string[] } | null = null;
-
-  for (const block of body) {
-    if (block._type === "block" && (block.style === "h2" || block.style === "h3")) {
-      if (currentSection) {
-        sections.push({
-          id: currentSection.id,
-          heading: currentSection.heading,
-          content: currentSection.paragraphs.join("\n\n"),
-        });
-      }
-      const text = block.children?.map((c) => c.text).join("") || "";
-      currentSection = { id: block._key, heading: text, paragraphs: [] };
-    } else if (block._type === "block" && currentSection) {
-      const text = block.children?.map((c) => c.text).join("") || "";
-      if (text.trim()) currentSection.paragraphs.push(text);
-    } else if (block._type === "block" && !currentSection) {
-      const text = block.children?.map((c) => c.text).join("") || "";
-      if (text.trim()) {
-        currentSection = { id: "intro", heading: "Introduction", paragraphs: [text] };
-      }
-    }
-  }
-
-  if (currentSection) {
-    sections.push({
-      id: currentSection.id,
-      heading: currentSection.heading,
-      content: currentSection.paragraphs.join("\n\n"),
-    });
-  }
-
-  return sections;
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0980-\u09ff\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+function extractPlainText(body: Block[]): string {
+  if (!body) return "";
+  return body
+    .filter((block) => block._type === "block")
+    .map((block) => block.children?.map((c) => c.text).join("") || "")
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+export async function generateMetadata({
+  params,
+}: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
 
   try {
@@ -77,7 +67,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     if (post) {
       return {
         title: post.title,
-        description: post.excerpt || "",
+        description: post.excerpt || post.summary || "",
       };
     }
   } catch {
@@ -102,19 +92,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const tocItems = extractTocFromBody(sanityPost.body);
-  const sections = extractSectionsFromBody(sanityPost.body);
+  const plainText = extractPlainText(sanityPost.body);
 
   const post = {
     title: sanityPost.title,
+    summary: sanityPost.summary || sanityPost.excerpt,
     category: sanityPost.category || "Design",
     date: formatDate(sanityPost.publishedAt),
     readingTime: sanityPost.readingTime || "5 min read",
     author: "mehedihas",
-    hasAudio: !!sanityPost.audioUrl,
-    audioDuration: sanityPost.audioDuration || "0:00",
-    coverColor: sanityPost.coverColor ? `bg-[${sanityPost.coverColor}]` : "bg-bg-subtle",
+    hasAudio: sanityPost.enableAudio || false,
+    audioDuration: sanityPost.audioDuration,
+    language: sanityPost.language || "BANGLA",
     tocItems,
-    sections,
+    body: sanityPost.body || [],
+    plainText,
+    references: sanityPost.references || [],
+    factChecks: sanityPost.factChecks || [],
+    relatedPosts: sanityPost.relatedPosts || [],
   };
 
   return <BlogPostClient post={post} slug={slug} />;
