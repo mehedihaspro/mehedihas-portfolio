@@ -110,6 +110,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     references: sanityPost.references || [],
     factChecks: sanityPost.factChecks || [],
     relatedPosts: sanityPost.relatedPosts || [],
+    quiz: sanityPost.quiz,
   };
 
   return <BlogPostClient post={post} slug={slug} />;

@@ -222,13 +222,15 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
         </article>
 
         {/* Quiz — optional, shown before related content */}
-        {post.quiz && post.quiz.enabled && (
-          <Quiz
-            quiz={post.quiz}
-            articleTitle={post.title}
-            articleUrl={currentUrl}
-          />
-        )}
+        {post.quiz &&
+          post.quiz.questions &&
+          post.quiz.questions.length > 0 && (
+            <Quiz
+              quiz={post.quiz}
+              articleTitle={post.title}
+              articleUrl={currentUrl}
+            />
+          )}
 
         {/* Related content — using BlogCard */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (

@@ -15,10 +15,10 @@ export function PageHeader({
   const label = breadcrumbLabel || title;
 
   return (
-    <section className="rounded-[14px] px-6 pt-2 pb-6">
+    <section className="px-6 pt-0 pb-5">
       {/* Breadcrumb */}
-      <div className="flex flex-col mb-5">
-        <p className="text-[16px] font-normal text-text-primary leading-[24px] font-inter mb-1">
+      <div className="flex flex-col mb-4">
+        <p className="text-[14px] md:text-[16px] font-normal text-text-primary leading-[22px] font-inter mb-0.5">
           <Link href="/" className="hover:text-amber transition-colors">
             Home
           </Link>
@@ -26,8 +26,8 @@ export function PageHeader({
           <span className="text-amber">{label}</span>
         </p>
 
-        {/* Page title — Amatic SC Bold 128px */}
-        <h1 className="font-display font-bold text-[clamp(64px,10vw,128px)] leading-[0.9] tracking-[-0.08em] text-[#36322d]">
+        {/* Page title — Amatic SC Bold, responsive */}
+        <h1 className="font-display font-bold text-[clamp(56px,9vw,128px)] leading-[0.88] tracking-[-0.06em] text-[#36322d] -mt-2">
           {title}
         </h1>
       </div>

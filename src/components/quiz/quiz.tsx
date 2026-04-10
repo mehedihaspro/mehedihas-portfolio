@@ -43,7 +43,7 @@ export function Quiz({ quiz, articleTitle, articleUrl }: QuizProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quiz.questions, seed]);
 
-  if (!quiz.enabled || !quiz.questions || quiz.questions.length === 0) {
+  if (!quiz.questions || quiz.questions.length === 0) {
     return null;
   }
 

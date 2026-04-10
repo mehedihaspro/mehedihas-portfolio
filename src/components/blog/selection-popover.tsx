@@ -57,7 +57,7 @@ export function SelectionPopover({
       const rect = range.getBoundingClientRect();
       setPosition({
         x: rect.left + rect.width / 2,
-        y: rect.top - 12,
+        y: rect.top - 14,
       });
       setSelectedText(text);
     };
@@ -84,7 +84,6 @@ export function SelectionPopover({
   const handlePronounce = async () => {
     if (isPronouncing || !selectedText) return;
 
-    // Google TTS has a max ~5000 char limit but for pronunciation we want short
     if (selectedText.length > 200) {
       onToast?.("Select a shorter phrase to pronounce");
       return;
@@ -111,7 +110,6 @@ export function SelectionPopover({
         return;
       }
 
-      // Convert base64 to blob and play
       const byteCharacters = atob(data.audioContent);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -147,52 +145,74 @@ export function SelectionPopover({
 
   return (
     <div
-      className="fixed z-[1002] flex items-center gap-0.5 p-1 rounded-[10px] bg-[#2D2D2D] shadow-[0_8px_24px_rgba(0,0,0,0.2)] animate-in fade-in zoom-in-95 duration-150"
+      className="fixed z-[1002] animate-in fade-in zoom-in-95 duration-200"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: "translate(-50%, -100%)",
       }}
     >
-      <button
-        onClick={handlePronounce}
-        disabled={isPronouncing}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-[7px] text-[12px] font-medium text-white hover:bg-white/10 transition-colors font-inter disabled:opacity-60"
-      >
-        {isPronouncing ? (
-          <Loader2 size={13} className="animate-spin" />
-        ) : (
-          <Volume2 size={13} />
-        )}
-        Pronounce
-      </button>
-      <div className="w-px h-4 bg-white/20" />
-      <button
-        onClick={() => {
-          onCopy(selectedText);
-          setPosition(null);
-          window.getSelection()?.removeAllRanges();
+      <div
+        className="flex items-stretch bg-[#1a1a1a] rounded-[14px] overflow-hidden border border-white/10"
+        style={{
+          boxShadow: "0 16px 40px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)",
         }}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-[7px] text-[12px] font-medium text-white hover:bg-white/10 transition-colors font-inter"
       >
-        <Copy size={13} />
-        Copy
-      </button>
-      <div className="w-px h-4 bg-white/20" />
-      <button
-        onClick={() => {
-          onShare(selectedText);
-          setPosition(null);
-        }}
-        className="flex items-center gap-1.5 px-3 py-2 rounded-[7px] text-[12px] font-medium text-white hover:bg-white/10 transition-colors font-inter"
-      >
-        <Share2 size={13} />
-        Share
-      </button>
+        {/* Pronounce */}
+        <button
+          onClick={handlePronounce}
+          disabled={isPronouncing}
+          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter disabled:opacity-60"
+        >
+          <div className="w-7 h-7 rounded-full bg-amber/20 flex items-center justify-center text-amber group-hover:bg-amber/30 transition-colors">
+            {isPronouncing ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <Volume2 size={15} />
+            )}
+          </div>
+          <span className="text-[11px] font-medium tracking-tight">
+            Pronounce
+          </span>
+        </button>
+
+        <div className="w-px bg-white/10" />
+
+        {/* Copy */}
+        <button
+          onClick={() => {
+            onCopy(selectedText);
+            setPosition(null);
+            window.getSelection()?.removeAllRanges();
+          }}
+          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter"
+        >
+          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-white/20 transition-colors">
+            <Copy size={14} />
+          </div>
+          <span className="text-[11px] font-medium tracking-tight">Copy</span>
+        </button>
+
+        <div className="w-px bg-white/10" />
+
+        {/* Share */}
+        <button
+          onClick={() => {
+            onShare(selectedText);
+            setPosition(null);
+          }}
+          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter"
+        >
+          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-white/20 transition-colors">
+            <Share2 size={14} />
+          </div>
+          <span className="text-[11px] font-medium tracking-tight">Share</span>
+        </button>
+      </div>
+
       {/* Arrow pointing down */}
       <div
-        className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#2D2D2D] rotate-45"
-        style={{ clipPath: "polygon(0 100%, 100% 100%, 100% 0)" }}
+        className="absolute left-1/2 -translate-x-1/2 -bottom-[6px] w-3 h-3 bg-[#1a1a1a] rotate-45 border-r border-b border-white/10"
       />
     </div>
   );

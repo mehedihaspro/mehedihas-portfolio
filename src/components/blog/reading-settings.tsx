@@ -129,14 +129,14 @@ export function ReadingSettings() {
 
   return (
     <>
-      {/* Floating action button — bottom right, bigger */}
+      {/* Floating action button — bottom right */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-8 right-8 z-[999] w-14 h-14 rounded-full bg-bg-card border border-border shadow-xl hover:shadow-2xl flex items-center justify-center text-text-primary hover:text-amber transition-all duration-200 hover:scale-105"
+        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[999] w-12 h-12 md:w-14 md:h-14 rounded-full bg-bg-card border border-border shadow-xl hover:shadow-2xl flex items-center justify-center text-text-primary hover:text-amber transition-all duration-200 hover:scale-105"
         aria-label="Reading settings"
         style={{ boxShadow: "0 10px 30px rgba(0,0,0,0.12)" }}
       >
-        {isOpen ? <X size={20} /> : <Settings2 size={20} />}
+        {isOpen ? <X size={18} /> : <Settings2 size={18} />}
       </button>
 
       {/* Settings panel — bigger, more organized */}
@@ -148,11 +148,11 @@ export function ReadingSettings() {
           />
 
           <div
-            className="fixed bottom-28 right-8 z-[999] w-[400px] rounded-[20px] bg-bg-card border border-border p-0 animate-in fade-in slide-in-from-bottom-4 duration-200 overflow-hidden"
+            className="fixed bottom-24 right-4 left-4 md:left-auto md:right-8 md:bottom-28 z-[999] md:w-[400px] max-w-full rounded-[20px] bg-bg-card border border-border p-0 animate-in fade-in slide-in-from-bottom-4 duration-200 overflow-hidden"
             style={{
               boxShadow:
                 "0 24px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08)",
-              maxHeight: "calc(100vh - 160px)",
+              maxHeight: "calc(100vh - 140px)",
               overflowY: "auto",
             }}
           >

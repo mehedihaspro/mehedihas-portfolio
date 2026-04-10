@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Play,
   Pause,
@@ -12,6 +12,7 @@ import {
   Loader2,
   SkipBack,
   SkipForward,
+  ChevronUp,
 } from "lucide-react";
 
 interface AudioPlayerProps {
@@ -31,7 +32,7 @@ export function AudioPlayer({
   onClose,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mainPlayerRef = useRef<HTMLDivElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -41,70 +42,75 @@ export function AudioPlayer({
   const [speed, setSpeed] = useState<Speed>(1);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isSticky, setIsSticky] = useState(false);
+  const [showMini, setShowMini] = useState(false);
 
-  // Detect when the original position scrolls out of view → become sticky
+  // Show mini player when main player scrolls fully out of view
   useEffect(() => {
-    if (!containerRef.current) return;
+    const el = mainPlayerRef.current;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsSticky(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+        // Only show mini if main is above viewport AND audio is loaded
+        const isAbove =
+          !entry.isIntersecting && entry.boundingClientRect.bottom < 0;
+        setShowMini(isAbove);
       },
       { threshold: 0, rootMargin: "0px" }
     );
 
-    observer.observe(containerRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
-  const loadAudio = async (selectedVoice: Voice) => {
-    setLoading(true);
-    setLoadingStatus(
-      `Generating ${selectedVoice === "female" ? "female" : "male"} voice...`
-    );
-    setError(null);
-    try {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: articleText.slice(0, 4900),
-          voice: selectedVoice,
-          language,
-        }),
-      });
+  const loadAudio = useCallback(
+    async (selectedVoice: Voice) => {
+      setLoading(true);
+      setLoadingStatus(
+        `Generating ${selectedVoice === "female" ? "female" : "male"} voice...`
+      );
+      setError(null);
+      try {
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: articleText.slice(0, 4900),
+            voice: selectedVoice,
+            language,
+          }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error || "Failed to load audio");
-        setLoading(false);
+        if (!res.ok) {
+          setError(data.error || "Failed to load audio");
+          setLoading(false);
+          setLoadingStatus("");
+          return;
+        }
+
+        setLoadingStatus("Preparing playback...");
+
+        const byteCharacters = atob(data.audioContent);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: "audio/mp3" });
+        const url = URL.createObjectURL(blob);
+        setAudioSrc(url);
         setLoadingStatus("");
-        return;
+      } catch {
+        setError("Something went wrong loading audio");
+        setLoadingStatus("");
+      } finally {
+        setLoading(false);
       }
-
-      setLoadingStatus("Preparing playback...");
-
-      // Convert base64 to blob URL
-      const byteCharacters = atob(data.audioContent);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: "audio/mp3" });
-      const url = URL.createObjectURL(blob);
-      setAudioSrc(url);
-      setLoadingStatus("Ready");
-      setTimeout(() => setLoadingStatus(""), 800);
-    } catch {
-      setError("Something went wrong loading audio");
-      setLoadingStatus("");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [articleText, language]
+  );
 
   const handlePlay = async () => {
     if (!audioSrc) {
@@ -120,7 +126,7 @@ export function AudioPlayer({
     }
   };
 
-  // Auto-play once audio is loaded (after load from click)
+  // Auto-play once audio is loaded
   useEffect(() => {
     if (audioSrc && audioRef.current && !isPlaying) {
       const timer = setTimeout(() => {
@@ -202,44 +208,26 @@ export function AudioPlayer({
     );
   };
 
+  const scrollToMain = () => {
+    mainPlayerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
   const speeds: Speed[] = [0.75, 1, 1.25, 1.5, 2];
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <>
-      {/* Anchor for sticky detection */}
-      <div ref={containerRef} />
-
-      {/* Player body */}
+      {/* ========== MAIN PLAYER (always inline in document flow) ========== */}
       <div
-        className={`w-full transition-all duration-500 ease-out ${
-          isSticky
-            ? "fixed bottom-4 left-1/2 -translate-x-1/2 max-w-[860px] z-[998] px-4"
-            : "relative max-w-[820px] mx-auto"
-        }`}
-        style={
-          isSticky
-            ? {
-                animation: "audioSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
-              }
-            : undefined
-        }
+        ref={mainPlayerRef}
+        className="w-full max-w-[820px] mx-auto"
       >
-        <div
-          className="rounded-[18px] bg-bg-card border border-border overflow-hidden backdrop-blur-xl"
-          style={
-            isSticky
-              ? {
-                  boxShadow:
-                    "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08)",
-                }
-              : {
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-                }
-          }
-        >
+        <div className="rounded-[16px] bg-bg-card border border-border overflow-hidden">
           {/* Top row: Play + info */}
-          <div className="flex items-center gap-4 px-5 py-4">
-            {/* Play button */}
+          <div className="flex items-center gap-3 md:gap-4 px-4 md:px-5 py-4">
             <button
               onClick={handlePlay}
               disabled={loading}
@@ -255,7 +243,6 @@ export function AudioPlayer({
               )}
             </button>
 
-            {/* Info + progress */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1.5">
                 <AudioLines size={11} className="text-amber shrink-0" />
@@ -264,7 +251,7 @@ export function AudioPlayer({
                 </p>
               </div>
               <div className="flex items-center gap-2.5">
-                <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0 w-8">
+                <span className="text-[10px] text-text-muted font-mono tabular-nums shrink-0 w-8">
                   {formatTime(currentTime)}
                 </span>
                 <div
@@ -272,33 +259,25 @@ export function AudioPlayer({
                   className="flex-1 h-1 rounded-full bg-border cursor-pointer relative group"
                 >
                   <div
-                    className="h-full rounded-full bg-amber transition-[width] duration-150"
-                    style={{
-                      width:
-                        duration > 0
-                          ? `${(currentTime / duration) * 100}%`
-                          : "0%",
-                    }}
+                    className="h-full rounded-full bg-amber"
+                    style={{ width: `${progressPercent}%` }}
                   />
                   <div
                     className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{
-                      left:
-                        duration > 0
-                          ? `${(currentTime / duration) * 100}%`
-                          : "0%",
+                      left: `${progressPercent}%`,
                       transform: "translate(-50%, -50%)",
                     }}
                   />
                 </div>
-                <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0 w-8 text-right">
+                <span className="text-[10px] text-text-muted font-mono tabular-nums shrink-0 w-8 text-right">
                   {formatTime(duration)}
                 </span>
               </div>
             </div>
 
-            {/* Skip buttons */}
-            <div className="flex items-center gap-1 shrink-0">
+            {/* Skip buttons — hidden on small screens */}
+            <div className="hidden sm:flex items-center gap-1 shrink-0">
               <button
                 onClick={() => skip(-15)}
                 disabled={!audioSrc}
@@ -317,7 +296,6 @@ export function AudioPlayer({
               </button>
             </div>
 
-            {/* Close */}
             {onClose && (
               <button
                 onClick={onClose}
@@ -330,10 +308,9 @@ export function AudioPlayer({
           </div>
 
           {/* Bottom controls */}
-          <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border bg-bg-subtle/40">
-            {/* Voice toggle */}
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 md:px-5 py-3 border-t border-border bg-bg-subtle/40">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter hidden sm:inline">
                 Voice
               </span>
               <div className="flex items-center gap-1 rounded-full bg-bg border border-border p-0.5">
@@ -364,7 +341,6 @@ export function AudioPlayer({
               </div>
             </div>
 
-            {/* Speed */}
             <div className="flex items-center gap-2">
               <Gauge size={12} className="text-text-muted" />
               <div className="flex items-center gap-0.5 rounded-full bg-bg border border-border p-0.5">
@@ -393,22 +369,78 @@ export function AudioPlayer({
         </div>
       </div>
 
+      {/* ========== MINI FLOATING PLAYER (appears when scrolled past main) ========== */}
+      <div
+        className={`fixed bottom-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[calc(100%-48px)] md:max-w-[560px] z-[997] pointer-events-none transition-all duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          showMini
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-6"
+        }`}
+      >
+        <div
+          className="rounded-full bg-bg-card/95 backdrop-blur-xl border border-border overflow-hidden"
+          style={{
+            boxShadow:
+              "0 20px 50px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.08)",
+          }}
+        >
+          <div className="flex items-center gap-3 pl-1.5 pr-3 py-1.5">
+            {/* Play */}
+            <button
+              onClick={handlePlay}
+              disabled={loading}
+              className="w-10 h-10 shrink-0 rounded-full bg-amber text-white flex items-center justify-center hover:bg-amber-dark transition-colors disabled:opacity-70"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {loading ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : isPlaying ? (
+                <Pause size={14} fill="currentColor" />
+              ) : (
+                <Play size={14} fill="currentColor" className="ml-0.5" />
+              )}
+            </button>
+
+            {/* Title + progress */}
+            <button
+              onClick={scrollToMain}
+              className="flex-1 min-w-0 text-left group"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <AudioLines size={10} className="text-amber shrink-0" />
+                <p className="text-[11px] font-semibold text-text-primary font-inter truncate group-hover:text-amber transition-colors">
+                  {title}
+                </p>
+              </div>
+              <div className="h-0.5 rounded-full bg-border overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-amber"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </button>
+
+            {/* Time */}
+            <span className="text-[10px] text-text-muted font-mono tabular-nums shrink-0 hidden sm:inline">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </span>
+
+            {/* Jump to main */}
+            <button
+              onClick={scrollToMain}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-subtle transition-colors shrink-0"
+              aria-label="Scroll to player"
+              title="Back to player"
+            >
+              <ChevronUp size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+
       {audioSrc && (
         <audio ref={audioRef} src={audioSrc} preload="auto" className="hidden" />
       )}
-
-      <style jsx>{`
-        @keyframes audioSlideUp {
-          from {
-            opacity: 0;
-            transform: translate(-50%, 20px);
-          }
-          to {
-            opacity: 1;
-            transform: translate(-50%, 0);
-          }
-        }
-      `}</style>
     </>
   );
 }
