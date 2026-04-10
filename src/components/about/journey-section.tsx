@@ -156,96 +156,97 @@ export function JourneySection() {
         </div>
       </div>
 
-      {/* Active chapter content */}
+      {/* Active chapter content — single centered column for reading feel */}
       <div
         key={activeIdx}
-        className="grid md:grid-cols-[1.2fr_1fr] gap-10 animate-in fade-in slide-in-from-bottom-4 duration-500"
+        className="max-w-[680px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500"
       >
-        {/* Left: Story */}
-        <div className="flex flex-col gap-6">
-          {/* Header */}
-          <div>
-            <p
-              className="text-[11px] font-bold uppercase tracking-[0.2em] mb-2 font-inter"
-              style={{ color: active.color }}
-            >
-              {active.company}
-            </p>
-            <h3 className="text-[28px] md:text-[36px] font-bold text-text-primary font-inter leading-tight tracking-tight">
-              {active.title}
-            </h3>
-          </div>
+        {/* Company tag */}
+        <p
+          className="text-[11px] font-bold uppercase tracking-[0.25em] mb-4 font-inter text-center"
+          style={{ color: active.color }}
+        >
+          {active.company}
+        </p>
 
-          {/* Story */}
-          <p className="text-[16px] leading-[1.75] text-text-secondary font-inter">
-            {active.story}
+        {/* Title */}
+        <h3 className="text-[32px] md:text-[42px] font-bold text-text-primary font-inter leading-[1.1] tracking-[-0.02em] text-center mb-8">
+          {active.title}
+        </h3>
+
+        {/* Story */}
+        <p className="text-[17px] leading-[1.8] text-text-secondary font-inter mb-10 text-center max-w-[620px] mx-auto">
+          {active.story}
+        </p>
+
+        {/* Pull quote — centered, handwritten */}
+        <div className="relative flex flex-col items-center mb-12 py-6">
+          <Quote
+            size={24}
+            className="mb-4"
+            style={{ color: active.color }}
+            fill="currentColor"
+          />
+          <p className="font-handwriting text-[26px] md:text-[30px] text-text-primary leading-[1.35] italic text-center max-w-[540px]">
+            &ldquo;{active.quote}&rdquo;
           </p>
+          {/* Subtle decorative line */}
+          <div
+            className="w-12 h-px mt-6"
+            style={{ backgroundColor: `${active.color}60` }}
+          />
+        </div>
 
-          {/* Quote */}
-          <div className="relative pl-6 border-l-2 border-amber">
-            <Quote
-              size={16}
-              className="absolute -left-[8.5px] top-0 text-amber bg-bg"
-              fill="currentColor"
-            />
-            <p className="font-handwriting text-[22px] text-text-primary leading-[1.4] italic">
-              &ldquo;{active.quote}&rdquo;
-            </p>
+        {/* What I learned — horizontal strip of pills */}
+        <div className="text-center mb-8">
+          <p
+            className="text-[10px] font-bold uppercase tracking-[0.25em] mb-4 font-inter text-text-muted"
+          >
+            What I learned
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {active.lessons.map((lesson, i) => (
+              <div
+                key={i}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border transition-colors"
+                style={{
+                  backgroundColor: `${active.color}0c`,
+                  borderColor: `${active.color}30`,
+                }}
+              >
+                <ChevronRight
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: active.color }}
+                />
+                <span className="text-[13px] text-text-primary font-inter font-medium">
+                  {lesson}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Right: What I learned */}
-        <div className="flex flex-col gap-5">
-          <div
-            className="rounded-2xl p-6 border"
-            style={{
-              backgroundColor: `${active.color}10`,
-              borderColor: `${active.color}30`,
-            }}
+        {/* Navigation hint */}
+        <div className="flex items-center justify-center gap-8 pt-8 border-t border-border text-[12px] text-text-muted font-inter">
+          <button
+            onClick={() =>
+              setActiveIdx(Math.min(JOURNEY.length - 1, activeIdx + 1))
+            }
+            disabled={activeIdx === JOURNEY.length - 1}
+            className="flex items-center gap-1.5 hover:text-amber transition-colors disabled:opacity-30 disabled:hover:text-text-muted"
           >
-            <p
-              className="text-[11px] font-bold uppercase tracking-[0.2em] mb-4 font-inter"
-              style={{ color: active.color }}
-            >
-              What I learned
-            </p>
-            <ul className="flex flex-col gap-3">
-              {active.lessons.map((lesson, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-3 text-[14px] text-text-primary font-inter leading-relaxed"
-                >
-                  <ChevronRight
-                    size={14}
-                    className="mt-1 shrink-0"
-                    style={{ color: active.color }}
-                  />
-                  <span>{lesson}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Navigation hint */}
-          <div className="flex items-center justify-between text-[12px] text-text-muted font-inter">
-            <button
-              onClick={() =>
-                setActiveIdx(Math.min(JOURNEY.length - 1, activeIdx + 1))
-              }
-              disabled={activeIdx === JOURNEY.length - 1}
-              className="flex items-center gap-1 hover:text-amber transition-colors disabled:opacity-30 disabled:hover:text-text-muted"
-            >
-              ← {JOURNEY[Math.min(JOURNEY.length - 1, activeIdx + 1)]?.year}{" "}
-              earlier
-            </button>
-            <button
-              onClick={() => setActiveIdx(Math.max(0, activeIdx - 1))}
-              disabled={activeIdx === 0}
-              className="flex items-center gap-1 hover:text-amber transition-colors disabled:opacity-30 disabled:hover:text-text-muted"
-            >
-              later {JOURNEY[Math.max(0, activeIdx - 1)]?.year} →
-            </button>
-          </div>
+            ← {JOURNEY[Math.min(JOURNEY.length - 1, activeIdx + 1)]?.year}{" "}
+            earlier
+          </button>
+          <span className="text-text-muted/40">·</span>
+          <button
+            onClick={() => setActiveIdx(Math.max(0, activeIdx - 1))}
+            disabled={activeIdx === 0}
+            className="flex items-center gap-1.5 hover:text-amber transition-colors disabled:opacity-30 disabled:hover:text-text-muted"
+          >
+            later {JOURNEY[Math.max(0, activeIdx - 1)]?.year} →
+          </button>
         </div>
       </div>
     </div>
