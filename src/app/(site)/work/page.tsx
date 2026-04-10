@@ -135,12 +135,12 @@ export default async function WorkPage() {
 
       <section className="py-12 border-t border-border text-center">
         <p className="text-text-secondary mb-4">Interested in working together?</p>
-        <Link
-          href="/contact"
+        <a
+          href="mailto:hellomehedihas@gmail.com"
           className="h-10 px-6 inline-flex items-center justify-center rounded-xl bg-amber text-white text-sm font-semibold hover:bg-amber-dark transition-colors"
         >
           Get in touch
-        </Link>
+        </a>
       </section>
     </div>
   );

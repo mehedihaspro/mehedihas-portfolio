@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Headphones } from "lucide-react";
+import { ArrowLeft, Headphones, Mail } from "lucide-react";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { AudioPlayer } from "@/components/blog/audio-player";
@@ -15,6 +15,8 @@ import { Toast } from "@/components/blog/toast";
 import { SelectionPopover } from "@/components/blog/selection-popover";
 import { PortableTextRenderer } from "@/components/blog/portable-text-renderer";
 import { FocusModeController } from "@/components/blog/focus-mode-controller";
+import { SubscribeModal } from "@/components/blog/subscribe-modal";
+import { Breadcrumb } from "@/components/layout/breadcrumb";
 import { Quiz } from "@/components/quiz";
 import type { QuizType } from "@/components/quiz";
 
@@ -81,6 +83,7 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
     show: false,
   });
   const [audioOpen, setAudioOpen] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
 
   const showToast = (message: string) => {
     setToast({ message, show: true });
@@ -117,24 +120,14 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
       <FocusModeController />
 
       <div className="mx-auto max-w-[820px] px-4 md:px-6 pt-8 md:pt-10 pb-12">
-        {/* Breadcrumb */}
-        <nav className="mb-6 flex items-center gap-2 text-[12px] text-text-muted font-inter">
-          <Link
-            href="/blog"
-            className="hover:text-text-primary transition-colors"
-          >
-            Blog
-          </Link>
-          <span>/</span>
-          <span className="text-amber">{post.category}</span>
-        </nav>
-
-        {/* Category chip */}
-        <div className="flex items-center gap-2 mb-7">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-subtle border border-border text-[13px] font-semibold uppercase tracking-[0.3px] text-text-secondary font-inter">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber" />
-            {post.category}
-          </span>
+        {/* Breadcrumb — global component */}
+        <div className="mb-6">
+          <Breadcrumb
+            items={[
+              { label: "Blog", href: "/blog" },
+              { label: post.category },
+            ]}
+          />
         </div>
 
         {/* Title */}
@@ -166,7 +159,7 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {post.hasAudio && (
               <button
                 onClick={() => setAudioOpen(!audioOpen)}
@@ -181,6 +174,17 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
                 Listen
               </button>
             )}
+            <button
+              onClick={() => setSubscribeOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber text-white text-[12px] font-semibold transition-all font-inter hover:bg-amber-dark"
+              style={{
+                boxShadow: "0 4px 12px rgba(232,168,50,0.25)",
+              }}
+              aria-label="Subscribe to newsletter"
+            >
+              <Mail size={14} />
+              Subscribe
+            </button>
             <ShareDropdown
               title={post.title}
               url={currentUrl}
@@ -263,6 +267,12 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
         onCopy={handleCopy}
         onShare={handleShareSelection}
         onToast={showToast}
+      />
+
+      {/* Subscribe modal */}
+      <SubscribeModal
+        isOpen={subscribeOpen}
+        onClose={() => setSubscribeOpen(false)}
       />
 
       {/* Toast */}

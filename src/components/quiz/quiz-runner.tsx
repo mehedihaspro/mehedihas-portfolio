@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, ArrowLeft, X } from "lucide-react";
+import { ArrowRight, ArrowLeft, X, CircleDot, Circle } from "lucide-react";
 import type { QuizQuestion, QuizAnswer } from "./types";
 
 interface QuizRunnerProps {
@@ -22,7 +22,6 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
   const isLast = currentIdx === questions.length - 1;
   const progress = ((currentIdx + 1) / questions.length) * 100;
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -30,7 +29,6 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
     };
   }, []);
 
-  // Keyboard support: 1-6 to select, Enter to advance, Esc to exit
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -76,7 +74,7 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
     setTimeout(() => {
       setCurrentIdx((i) => i + 1);
       setTransitioning(false);
-    }, 200);
+    }, 220);
   };
 
   const handlePrev = () => {
@@ -85,45 +83,56 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
     setTimeout(() => {
       setCurrentIdx((i) => i - 1);
       setTransitioning(false);
-    }, 200);
+    }, 220);
   };
 
   return (
     <div className="fixed inset-0 z-[1000] bg-bg overflow-y-auto">
-      {/* Top bar: progress + exit */}
-      <div className="sticky top-0 z-10 bg-bg/95 backdrop-blur-md border-b border-border">
-        <div className="mx-auto max-w-[820px] px-6 py-4 flex items-center gap-4">
-          {/* Progress bar */}
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted font-inter">
-                Question {currentIdx + 1} of {questions.length}
-              </span>
-              <span className="text-[11px] font-bold text-amber font-mono tabular-nums font-inter">
-                {Math.round(progress)}%
-              </span>
-            </div>
-            <div className="h-1 rounded-full bg-border overflow-hidden">
+      {/* Ambient background gradient */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-30"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(232,168,50,0.15) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Top bar */}
+      <div className="sticky top-0 z-10 bg-bg/90 backdrop-blur-xl border-b border-border/60">
+        <div className="mx-auto max-w-[820px] px-4 md:px-6 py-4 flex items-center gap-4">
+          {/* Question dots */}
+          <div className="flex items-center gap-1.5">
+            {questions.map((_, idx) => (
               <div
-                className="h-full rounded-full bg-amber transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
+                key={idx}
+                className={`transition-all duration-300 ${
+                  idx === currentIdx
+                    ? "w-6 h-1.5 rounded-full bg-amber"
+                    : idx < currentIdx
+                    ? "w-1.5 h-1.5 rounded-full bg-amber/50"
+                    : "w-1.5 h-1.5 rounded-full bg-border"
+                }`}
               />
-            </div>
+            ))}
           </div>
 
-          {/* Exit button */}
-          <button
-            onClick={onExit}
-            className="w-10 h-10 rounded-full bg-bg-subtle hover:bg-cream flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors shrink-0"
-            aria-label="Exit quiz"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex-1 flex items-center justify-end gap-3">
+            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter">
+              {currentIdx + 1} / {questions.length}
+            </span>
+            <button
+              onClick={onExit}
+              className="w-9 h-9 rounded-full bg-bg-subtle hover:bg-cream flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
+              aria-label="Exit quiz"
+            >
+              <X size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Question area */}
-      <div className="mx-auto max-w-[680px] px-6 py-12 md:py-20">
+      <div className="relative mx-auto max-w-[680px] px-4 md:px-6 py-10 md:py-16">
         <div
           key={currentIdx}
           className={`transition-all duration-300 ${
@@ -132,50 +141,59 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
               : "opacity-100 translate-y-0"
           }`}
         >
-          {/* Question number marker */}
-          <div className="flex items-center gap-2 mb-6">
-            <span className="font-display font-bold text-[48px] leading-none text-amber">
+          {/* Big question number */}
+          <div className="flex items-center gap-3 mb-7">
+            <span className="font-display font-bold text-[72px] md:text-[88px] leading-[0.85] text-amber/30 tracking-[-0.04em]">
               {String(currentIdx + 1).padStart(2, "0")}
             </span>
-            <div className="h-px flex-1 bg-border ml-2" />
+            <div className="flex-1 h-px bg-gradient-to-r from-amber/40 to-transparent" />
           </div>
 
           {/* Question */}
-          <h2 className="text-[24px] md:text-[30px] font-bold text-text-primary leading-[1.3] font-inter mb-8 tracking-[-0.01em]">
+          <h2 className="text-[24px] md:text-[34px] font-bold text-text-primary leading-[1.25] font-inter mb-9 tracking-[-0.01em]">
             {currentQuestion.question}
           </h2>
 
           {/* Options */}
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             {currentQuestion.options.map((option, idx) => {
               const isSelected = currentAnswer === idx;
-              const letter = String.fromCharCode(65 + idx); // A, B, C, D
+              const letter = String.fromCharCode(65 + idx);
               return (
                 <button
                   key={option._key || idx}
                   onClick={() => handleSelect(idx)}
-                  className={`group flex items-start gap-4 p-5 rounded-[14px] border-2 text-left transition-all duration-200 ${
+                  className={`group flex items-center gap-4 p-4 md:p-5 rounded-[16px] text-left transition-all duration-200 ${
                     isSelected
-                      ? "border-amber bg-highlight-bg shadow-[0_4px_12px_rgba(232,168,50,0.15)]"
-                      : "border-border bg-bg-card hover:border-amber/50 hover:-translate-y-0.5"
+                      ? "bg-highlight-bg ring-[1.5px] ring-amber"
+                      : "bg-bg-card hover:bg-bg-subtle ring-[1px] ring-border"
                   }`}
                 >
-                  {/* Letter badge */}
+                  {/* Radio indicator */}
+                  <div className="shrink-0">
+                    {isSelected ? (
+                      <CircleDot size={22} className="text-amber" strokeWidth={2} />
+                    ) : (
+                      <Circle size={22} className="text-text-muted/60 group-hover:text-text-secondary transition-colors" strokeWidth={1.8} />
+                    )}
+                  </div>
+
+                  {/* Letter */}
                   <div
-                    className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold font-inter transition-all ${
+                    className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-mono transition-all ${
                       isSelected
-                        ? "bg-amber text-white scale-110"
-                        : "bg-bg-subtle text-text-muted group-hover:bg-cream"
+                        ? "bg-amber text-white"
+                        : "bg-bg-subtle text-text-muted"
                     }`}
                   >
                     {letter}
                   </div>
 
-                  {/* Option text */}
+                  {/* Text */}
                   <span
-                    className={`flex-1 text-[15px] md:text-[16px] leading-relaxed font-inter pt-1 transition-colors ${
+                    className={`flex-1 text-[15px] md:text-[16px] leading-snug font-inter transition-colors ${
                       isSelected
-                        ? "text-text-primary font-medium"
+                        ? "text-text-primary font-semibold"
                         : "text-text-secondary group-hover:text-text-primary"
                     }`}
                   >
@@ -187,13 +205,13 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
           </div>
 
           {/* Keyboard hint */}
-          <p className="text-[11px] text-text-muted mt-6 font-inter hidden md:block">
+          <p className="text-[11px] text-text-muted mt-7 font-inter hidden md:block">
             Press{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-[10px] font-mono">
+            <kbd className="px-1.5 py-0.5 rounded bg-bg-subtle text-[10px] font-mono">
               1-{currentQuestion.options.length}
             </kbd>{" "}
-            to select,{" "}
-            <kbd className="px-1.5 py-0.5 rounded bg-bg-subtle border border-border text-[10px] font-mono">
+            or{" "}
+            <kbd className="px-1.5 py-0.5 rounded bg-bg-subtle text-[10px] font-mono">
               Enter
             </kbd>{" "}
             to continue
@@ -202,8 +220,8 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
       </div>
 
       {/* Bottom nav */}
-      <div className="sticky bottom-0 bg-bg/95 backdrop-blur-md border-t border-border">
-        <div className="mx-auto max-w-[680px] px-6 py-4 flex items-center justify-between gap-4">
+      <div className="sticky bottom-0 bg-bg/90 backdrop-blur-xl border-t border-border/60">
+        <div className="mx-auto max-w-[680px] px-4 md:px-6 py-4 flex items-center justify-between gap-4">
           <button
             onClick={handlePrev}
             disabled={currentIdx === 0}
@@ -216,11 +234,25 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
           <button
             onClick={handleNext}
             disabled={currentAnswer === null}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-amber hover:bg-amber-dark text-white text-[13px] font-semibold transition-all disabled:opacity-40 disabled:cursor-not-allowed font-inter shadow-[0_4px_12px_rgba(232,168,50,0.25)]"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-amber text-white text-[13px] font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed font-inter hover:shadow-[0_8px_20px_rgba(232,168,50,0.35)]"
+            style={{
+              boxShadow:
+                currentAnswer !== null
+                  ? "0 4px 12px rgba(232,168,50,0.3)"
+                  : "none",
+            }}
           >
-            {isLast ? "See results" : "Next"}
+            {isLast ? "See results" : "Continue"}
             <ArrowRight size={14} />
           </button>
+        </div>
+
+        {/* Progress strip */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-border/60">
+          <div
+            className="h-full bg-amber rounded-r-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { ThemeFab } from "@/components/layout/theme-fab";
 
 export default function SiteLayout({
   children,
@@ -11,6 +12,7 @@ export default function SiteLayout({
       <Navbar />
       <main className="flex-1 pt-14">{children}</main>
       <Footer />
+      <ThemeFab />
     </>
   );
 }

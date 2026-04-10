@@ -154,12 +154,12 @@ export default function WorkshopsPage() {
         <p className="text-sm text-text-secondary mb-5">
           Get in touch to stay updated about upcoming workshops.
         </p>
-        <Link
-          href="/contact"
+        <a
+          href="mailto:hellomehedihas@gmail.com"
           className="h-10 px-6 inline-flex items-center justify-center rounded-xl bg-text-primary text-bg text-sm font-semibold hover:opacity-90 transition-opacity"
         >
           Get in touch
-        </Link>
+        </a>
       </section>
     </div>
   );

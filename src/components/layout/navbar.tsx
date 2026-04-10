@@ -5,7 +5,6 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { ThemeSwitcher } from "./theme-switcher";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -13,7 +12,6 @@ const NAV_LINKS = [
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/workshops", label: "Workshops" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {
@@ -59,10 +57,8 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Right side: Theme + Mobile toggle */}
+        {/* Right side: Mobile toggle */}
         <div className="flex items-center gap-2">
-          <ThemeSwitcher />
-
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
