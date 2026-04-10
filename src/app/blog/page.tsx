@@ -2,59 +2,14 @@ import type { Metadata } from "next";
 import { sanityClient } from "@/lib/sanity/client";
 import { allPostsQuery, categoriesQuery } from "@/lib/sanity/queries";
 import { BlogPageClient } from "./blog-page-client";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Blog",
   description: "Thoughts on design, creativity, and building products.",
 };
 
-// Revalidate every 60 seconds so new Sanity content appears quickly
 export const revalidate = 60;
-
-// Sample data — shown when Sanity has no posts yet
-const SAMPLE_POSTS = [
-  {
-    slug: "duolingo-streak-psychology",
-    title: "Duolingo এর সবুজ পাখি কেন আপনাকে ছাড়ে না — Gamification Psychology",
-    excerpt:
-      "কেন আমরা streak হারাতে ভয় পাই? কীভাবে Duolingo আমাদের brain এর reward system কে hack করে?",
-    category: "Design Psychology",
-    date: "Mar 28, 2026",
-    readingTime: "8 min read",
-    hasAudio: true,
-    coverColor: "bg-[#2D5F2D]",
-  },
-  {
-    slug: "figma-variables-complete-guide",
-    title: "Figma Variables দিয়ে Design System তৈরি — Complete Guide",
-    excerpt:
-      "Variables, modes, collections — সব কিছু একজায়গায়। Practical examples সহ step-by-step guide।",
-    category: "Design System",
-    date: "Mar 15, 2026",
-    readingTime: "12 min read",
-    hasAudio: true,
-    coverColor: "bg-[#1E1E2E]",
-  },
-  {
-    slug: "why-designers-should-write",
-    title: "ডিজাইনারদের কেন লেখালেখি করা উচিত?",
-    excerpt:
-      "Writing শুধু content creators এর জন্য না। একজন designer হিসেবে লেখালেখি আপনার thinking sharpen করে।",
-    category: "Career",
-    date: "Mar 5, 2026",
-    readingTime: "5 min read",
-    hasAudio: false,
-    coverColor: "bg-[#8B6B4A]",
-  },
-];
-
-const SAMPLE_CATEGORIES = [
-  "Design Psychology",
-  "Design System",
-  "UX Design",
-  "Visual Design",
-  "Career",
-];
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -66,15 +21,14 @@ function formatDate(dateString: string): string {
 }
 
 export default async function BlogPage() {
-  let posts;
-  let categories;
+  let posts = [];
+  let categories: string[] = [];
 
   try {
     const sanityPosts = await sanityClient.fetch(allPostsQuery);
     const sanityCategories = await sanityClient.fetch(categoriesQuery);
 
     if (sanityPosts && sanityPosts.length > 0) {
-      // Transform Sanity data to match our component format
       posts = sanityPosts.map((post: {
         slug: { current: string };
         title: string;
@@ -94,16 +48,43 @@ export default async function BlogPage() {
         hasAudio: !!post.audioUrl,
         coverColor: post.coverColor ? `bg-[${post.coverColor}]` : "bg-bg-subtle",
       }));
-      categories = sanityCategories.filter(Boolean);
-    } else {
-      // Fallback to sample data
-      posts = SAMPLE_POSTS;
-      categories = SAMPLE_CATEGORIES;
+      categories = (sanityCategories || []).filter(Boolean);
     }
   } catch {
-    // If Sanity fetch fails, use sample data
-    posts = SAMPLE_POSTS;
-    categories = SAMPLE_CATEGORIES;
+    // Sanity fetch failed
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="mx-auto max-w-[1200px] px-6 py-20">
+        <section className="pt-8 pb-10">
+          <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
+            Blog
+          </p>
+          <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight">
+            Writing &<br />
+            <span className="text-text-secondary">Thinking</span>
+          </h1>
+        </section>
+
+        <div className="py-20 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-bg-subtle border border-border flex items-center justify-center mx-auto mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-text-muted">
+              <path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-text-primary mb-2">
+            No posts yet
+          </h3>
+          <p className="text-sm text-text-secondary max-w-sm mx-auto mb-6">
+            Articles will appear here once published in{" "}
+            <Link href="/studio" className="text-amber hover:text-amber-dark font-medium">
+              Sanity Studio
+            </Link>.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <BlogPageClient posts={posts} categories={categories} />;
