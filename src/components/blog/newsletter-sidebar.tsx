@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Divider } from "@/components/ui/divider";
 
@@ -9,7 +9,6 @@ export function NewsletterSidebar() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,12 +99,15 @@ export function NewsletterSidebar() {
           <form onSubmit={handleSubmit} noValidate className="w-full rounded-[14px] bg-bg p-0.5 flex flex-col gap-4 items-center justify-center">
             <div className="flex flex-col gap-0.5 items-start w-full">
               {/* Email label with animated amber bar */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
+                {/* Animated amber bar — grows in width so label slides right */}
                 <div
-                  className={`w-0.5 rounded-full bg-amber transition-all duration-300 ease-out ${
-                    isFocused ? "h-[18px] opacity-100" : "h-0 opacity-0"
+                  className={`overflow-hidden transition-all duration-300 ease-out ${
+                    isFocused ? "w-[10px]" : "w-0"
                   }`}
-                />
+                >
+                  <div className="w-0.5 h-[18px] bg-amber rounded-full" />
+                </div>
                 <span className="text-[16px] font-normal text-text-primary leading-[25.88px] font-inter">
                   Email
                 </span>
@@ -114,7 +116,6 @@ export function NewsletterSidebar() {
               {/* Input with animated dashed bottom border */}
               <div className="w-full relative">
                 <input
-                  ref={inputRef}
                   type="email"
                   value={email}
                   onChange={(e) => {
@@ -127,15 +128,16 @@ export function NewsletterSidebar() {
                   onFocus={() => setIsFocused(true)}
                   onBlur={() => setIsFocused(false)}
                   placeholder="example@company.com"
-                  className="w-full bg-transparent text-[16px] font-normal text-text-primary placeholder:text-text-muted leading-[24px] focus:outline-none font-inter py-4 pr-3 border-0"
+                  className="w-full bg-transparent text-[16px] font-normal text-text-primary placeholder:text-text-muted leading-[24px] focus:outline-none focus:ring-0 focus:border-0 font-inter py-4 pr-3 border-0 shadow-none appearance-none"
+                  style={{ boxShadow: "none", outline: "none" }}
                 />
 
                 {/* Bottom border — default color, dashed */}
-                <div className="absolute bottom-0 left-0 right-0 h-px border-b border-dashed border-border" />
+                <div className="absolute bottom-0 left-0 right-0 h-0 border-b border-dashed border-border" />
 
                 {/* Animated amber overlay — grows left to right on focus */}
                 <div
-                  className={`absolute bottom-0 left-0 h-px border-b border-dashed border-amber transition-all duration-500 ease-out ${
+                  className={`absolute bottom-0 left-0 h-0 border-b border-dashed border-amber transition-all duration-500 ease-out ${
                     isFocused ? "w-full" : "w-0"
                   }`}
                 />
@@ -153,7 +155,7 @@ export function NewsletterSidebar() {
             <button
               type="submit"
               disabled={status === "loading"}
-              className="w-full py-4 rounded-full bg-amber text-text-primary text-[16px] font-medium leading-[24px] text-center hover:bg-amber-dark transition-colors disabled:opacity-70 font-inter relative overflow-hidden"
+              className="w-full py-4 rounded-full bg-amber text-text-primary text-[16px] font-medium leading-[24px] text-center hover:bg-amber-dark transition-colors disabled:opacity-70 font-inter"
             >
               {status === "loading" ? (
                 <span className="flex items-center justify-center gap-2">
