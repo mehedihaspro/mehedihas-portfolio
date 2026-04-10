@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Quote } from "lucide-react";
 import { sanityClient } from "@/lib/sanity/client";
 import { projectBySlugQuery } from "@/lib/sanity/queries";
+import { PortableText } from "@portabletext/react";
 
 interface WorkDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -11,60 +12,14 @@ interface WorkDetailPageProps {
 
 export const revalidate = 60;
 
-function extractSectionsFromBody(body: Array<{ _type: string; style?: string; _key: string; children?: Array<{ text: string }> }>) {
-  if (!body) return [];
-
-  const sections: Array<{ id: string; heading: string; content: string }> = [];
-  let currentSection: { id: string; heading: string; paragraphs: string[] } | null = null;
-
-  for (const block of body) {
-    if (block._type === "block" && (block.style === "h2" || block.style === "h3")) {
-      if (currentSection) {
-        sections.push({
-          id: currentSection.id,
-          heading: currentSection.heading,
-          content: currentSection.paragraphs.join("\n\n"),
-        });
-      }
-      const text = block.children?.map((c) => c.text).join("") || "";
-      currentSection = { id: block._key, heading: text, paragraphs: [] };
-    } else if (block._type === "block" && currentSection) {
-      const text = block.children?.map((c) => c.text).join("") || "";
-      if (text.trim()) currentSection.paragraphs.push(text);
-    } else if (block._type === "block" && !currentSection) {
-      const text = block.children?.map((c) => c.text).join("") || "";
-      if (text.trim()) {
-        currentSection = { id: "overview", heading: "Overview", paragraphs: [text] };
-      }
-    }
-  }
-
-  if (currentSection) {
-    sections.push({
-      id: currentSection.id,
-      heading: currentSection.heading,
-      content: currentSection.paragraphs.join("\n\n"),
-    });
-  }
-
-  return sections;
-}
-
 export async function generateMetadata({ params }: WorkDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
-
   try {
     const project = await sanityClient.fetch(projectBySlugQuery, { slug });
     if (project) {
-      return {
-        title: project.title,
-        description: project.description || "",
-      };
+      return { title: project.title, description: project.overview || "" };
     }
-  } catch {
-    // Fall through
-  }
-
+  } catch { /* fall through */ }
   return { title: "Project not found" };
 }
 
@@ -74,74 +29,78 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   let project;
   try {
     project = await sanityClient.fetch(projectBySlugQuery, { slug });
-  } catch {
-    // Fetch failed
-  }
+  } catch { /* fetch failed */ }
 
-  if (!project) {
-    notFound();
-  }
+  if (!project) notFound();
 
-  const sections = extractSectionsFromBody(project.body);
   const coverColor = project.coverColor ? `bg-[${project.coverColor}]` : "bg-bg-subtle";
 
   return (
     <div className="mx-auto max-w-[820px] px-6 py-20">
       {/* Breadcrumb */}
       <nav className="mb-8 flex items-center gap-2 text-[12px] text-text-muted">
-        <Link href="/work" className="hover:text-text-primary transition-colors">
-          Work
-        </Link>
+        <Link href="/work" className="hover:text-text-primary transition-colors">Work</Link>
         <span>/</span>
-        <span className="text-amber">{project.title}</span>
+        <span className="text-amber truncate">{project.title}</span>
       </nav>
 
-      {/* Header */}
+      {/* ========== TITLE ========== */}
       <header className="mb-10">
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          {project.role && (
-            <span className="text-[11px] font-semibold text-amber uppercase tracking-wider">
-              {project.role}
-            </span>
-          )}
-          {project.client && (
-            <>
-              <span className="text-text-muted text-[11px]">&middot;</span>
-              <span className="text-[11px] text-text-muted">{project.client}</span>
-            </>
-          )}
-          {project.year && (
-            <>
-              <span className="text-text-muted text-[11px]">&middot;</span>
-              <span className="text-[11px] text-text-muted">{project.year}</span>
-            </>
-          )}
-        </div>
-
-        <h1 className="text-3xl md:text-[42px] font-bold text-text-primary leading-[1.15] tracking-tight mb-4">
+        <h1 className="text-3xl md:text-[42px] font-bold text-text-primary leading-[1.15] tracking-tight mb-5">
           {project.title}
         </h1>
-
-        {project.description && (
-          <p className="text-lg text-text-secondary leading-relaxed max-w-[680px]">
-            {project.description}
-          </p>
-        )}
 
         {project.liveUrl && (
           <a
             href={project.liveUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 text-sm text-amber hover:text-amber-dark font-medium transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-amber hover:text-amber-dark font-medium transition-colors"
           >
             View live project <ExternalLink size={14} />
           </a>
         )}
       </header>
 
-      {/* Cover */}
+      {/* ========== THUMBNAIL / COVER ========== */}
       <div className={`w-full aspect-[2.2/1] rounded-2xl ${coverColor} mb-10`} />
+
+      {/* ========== OVERVIEW ========== */}
+      {project.overview && (
+        <section className="mb-10 max-w-[680px]">
+          <p className="text-lg text-text-secondary leading-relaxed">{project.overview}</p>
+
+          <div className="mt-5 space-y-1.5">
+            {project.role && (
+              <p className="text-[14px] text-text-secondary">
+                <span className="font-semibold text-text-primary">Role:</span> {project.role}
+              </p>
+            )}
+            {project.team && (
+              <p className="text-[14px] text-text-secondary">
+                <span className="font-semibold text-text-primary">Team:</span> {project.team}
+              </p>
+            )}
+            {project.outcomeStatus && (
+              <p className="text-[14px] text-text-secondary">
+                <span className="font-semibold text-text-primary">Outcome:</span> {project.outcomeStatus}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ========== CONTRIBUTION (callout) ========== */}
+      {project.contribution && (
+        <section className="mb-10">
+          <div className="rounded-xl bg-highlight-bg border-l-4 border-amber px-5 py-4 flex gap-3">
+            <Quote size={18} className="text-amber shrink-0 mt-0.5" />
+            <p className="text-[15px] text-text-primary leading-relaxed font-medium italic">
+              {project.contribution}
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Tags */}
       {project.tags?.length > 0 && (
@@ -154,24 +113,116 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
         </div>
       )}
 
-      {/* Case Study Body */}
-      {sections.length > 0 && (
-        <article className="max-w-[680px]">
-          <div className="text-[18px] leading-[1.8] text-text-primary">
-            {sections.map((section) => (
-              <section key={section.id} className="mb-10">
-                <h2 id={section.id} className="text-[27px] font-bold text-text-primary leading-tight mb-4 scroll-mt-20">
-                  {section.heading}
-                </h2>
-                {section.content.split("\n\n").map((paragraph, i) => (
-                  <p key={i} className="mb-4 text-text-secondary leading-[inherit]">
-                    {paragraph}
-                  </p>
-                ))}
-              </section>
+      {/* ========== PROBLEM SPACE IMAGES ========== */}
+      {project.problemImages?.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.14em] mb-4">
+            Problem Space
+          </h2>
+          <div className="grid gap-4">
+            {project.problemImages.map((img: { _key: string; caption?: string }, i: number) => (
+              <div key={img._key || i} className="aspect-video rounded-xl bg-bg-subtle border border-border">
+                {img.caption && (
+                  <p className="text-[12px] text-text-muted mt-2 text-center">{img.caption}</p>
+                )}
+              </div>
             ))}
           </div>
-        </article>
+        </section>
+      )}
+
+      {/* ========== RESEARCH ========== */}
+      {project.research?.length > 0 && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-4">Research</h2>
+          <div className="text-[16px] text-text-secondary leading-[1.8] prose-bullets">
+            <PortableText value={project.research} />
+          </div>
+        </section>
+      )}
+
+      {/* ========== PLANNING ========== */}
+      {project.planning?.length > 0 && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-4">Planning</h2>
+          <div className="text-[16px] text-text-secondary leading-[1.8]">
+            <PortableText value={project.planning} />
+          </div>
+        </section>
+      )}
+
+      {/* ========== SOLUTION SPACE IMAGES ========== */}
+      {project.solutionImages?.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.14em] mb-4">
+            Solution Space
+          </h2>
+          <div className="grid gap-4">
+            {project.solutionImages.map((img: { _key: string; caption?: string }, i: number) => (
+              <div key={img._key || i} className="aspect-video rounded-xl bg-bg-subtle border border-border">
+                {img.caption && (
+                  <p className="text-[12px] text-text-muted mt-2 text-center">{img.caption}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ========== SOLUTIONS (Design Decisions) ========== */}
+      {project.solutions?.length > 0 && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-5">Solutions</h2>
+          <div className="space-y-5">
+            {project.solutions.map((sol: { _key: string; label: string; description: string }) => (
+              <div key={sol._key} className="pl-4 border-l-2 border-amber">
+                <h3 className="text-[16px] font-bold text-text-primary mb-1">{sol.label}</h3>
+                <p className="text-[15px] text-text-secondary leading-relaxed">{sol.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ========== CHALLENGES ========== */}
+      {project.challenges?.length > 0 && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-5">Challenges</h2>
+          <div className="space-y-4">
+            {project.challenges.map((ch: { _key: string; name: string; description: string }) => (
+              <div key={ch._key}>
+                <h3 className="text-[15px] font-bold text-text-primary">{ch.name}</h3>
+                <p className="text-[15px] text-text-secondary leading-relaxed">{ch.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ========== DETAILED OUTCOME ========== */}
+      {project.detailedOutcome?.length > 0 && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-4">Outcome</h2>
+          <div className="text-[16px] text-text-secondary leading-[1.8]">
+            <PortableText value={project.detailedOutcome} />
+          </div>
+        </section>
+      )}
+
+      {/* ========== LEARNING ========== */}
+      {project.learning && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-4">Learning</h2>
+          <p className="text-[16px] text-text-secondary leading-[1.8]">{project.learning}</p>
+        </section>
+      )}
+
+      {/* ========== WHAT'S NEXT ========== */}
+      {project.whatsNext && (
+        <section className="mb-10 max-w-[680px]">
+          <h2 className="text-[22px] font-bold text-text-primary mb-4">What&apos;s Next</h2>
+          <p className="text-[16px] text-text-secondary leading-[1.8]">{project.whatsNext}</p>
+        </section>
       )}
 
       {/* Back */}

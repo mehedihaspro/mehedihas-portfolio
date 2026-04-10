@@ -33,10 +33,10 @@ export default async function HomePage() {
     }
 
     if (sanityProjects?.length) {
-      projects = sanityProjects.slice(0, 2).map((p: { slug: { current: string }; title: string; description: string; role: string; coverColor: string }) => ({
+      projects = sanityProjects.slice(0, 2).map((p: { slug: { current: string }; title: string; overview: string; role: string; coverColor: string }) => ({
         slug: p.slug.current,
         title: p.title,
-        description: p.description || "",
+        description: p.overview || "",
         role: p.role || "Designer",
         coverColor: p.coverColor ? `bg-[${p.coverColor}]` : "bg-bg-subtle",
       }));

@@ -28,7 +28,7 @@ export default async function WorkPage() {
       projects = sanityProjects.map((p: {
         slug: { current: string };
         title: string;
-        description: string;
+        overview: string;
         role: string;
         client: string;
         year: string;
@@ -37,7 +37,7 @@ export default async function WorkPage() {
       }) => ({
         slug: p.slug.current,
         title: p.title,
-        description: p.description || "",
+        description: p.overview || "",
         role: p.role || "Designer",
         client: p.client || "",
         year: p.year || "",
