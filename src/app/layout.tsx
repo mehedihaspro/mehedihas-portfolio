@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Hind_Siliguri, Amatic_SC, Caveat } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/theme-provider";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -76,11 +74,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-inter antialiased bg-bg text-text-primary">
-        <ThemeProvider>
-          <Navbar />
-          <main className="flex-1 pt-14">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
