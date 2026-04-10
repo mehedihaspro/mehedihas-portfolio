@@ -75,11 +75,6 @@ export function NewsletterSidebar() {
           </div>
         </div>
 
-        {/* Description */}
-        <p className="font-handwriting text-[20px] font-normal leading-[28px] text-text-primary w-full">
-          Idea direction: magazine-style layout, quiet luxury surfaces, sharp typography hierarchy, and enough.
-        </p>
-
         {/* Email form */}
         {status === "success" ? (
           <div className="text-center py-6 w-full">
