@@ -2,11 +2,11 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { ArrowLeft, Share2, Headphones } from "lucide-react";
+import { ArrowLeft, Headphones } from "lucide-react";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { AudioPlayer } from "@/components/blog/audio-player";
-import { ShareModal } from "@/components/blog/share-modal";
+import { ShareDropdown } from "@/components/blog/share-dropdown";
 import { ReadingSettings } from "@/components/blog/reading-settings";
 import { ReferencesSection } from "@/components/blog/references-section";
 import { FactCheckSection } from "@/components/blog/fact-check-section";
@@ -14,6 +14,7 @@ import { RelatedContent } from "@/components/blog/related-content";
 import { Toast } from "@/components/blog/toast";
 import { SelectionPopover } from "@/components/blog/selection-popover";
 import { PortableTextRenderer } from "@/components/blog/portable-text-renderer";
+import { FocusModeController } from "@/components/blog/focus-mode-controller";
 
 interface TocItem {
   id: string;
@@ -42,7 +43,10 @@ interface RelatedPost {
   excerpt?: string;
   category?: string;
   readingTime?: string;
+  publishedAt?: string;
   coverColor?: string;
+  audioUrl?: string;
+  enableAudio?: boolean;
 }
 
 interface Post {
@@ -57,7 +61,7 @@ interface Post {
   language?: string;
   tocItems: TocItem[];
   body: unknown[];
-  plainText: string; // for TTS
+  plainText: string;
   references?: Reference[];
   factChecks?: FactCheck[];
   relatedPosts?: RelatedPost[];
@@ -73,8 +77,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
     message: "",
     show: false,
   });
-  const [shareOpen, setShareOpen] = useState(false);
-  const [shareSelection, setShareSelection] = useState<string | undefined>();
   const [audioOpen, setAudioOpen] = useState(false);
 
   const showToast = (message: string) => {
@@ -98,7 +100,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
   };
 
   const handleHighlight = (text: string) => {
-    // Save highlight to localStorage for persistence
     const highlights = JSON.parse(
       localStorage.getItem("mehedihas-highlights") || "[]"
     );
@@ -111,14 +112,19 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
     showToast("Highlighted");
   };
 
-  const handleShareSelection = (text: string) => {
-    setShareSelection(text);
-    setShareOpen(true);
+  const handleShareSelection = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(`"${text}"\n\n${currentUrl}`);
+      showToast("Quote copied to clipboard");
+    } catch {
+      showToast("Failed to copy");
+    }
   };
 
   return (
     <>
       <ReadingProgress />
+      <FocusModeController />
 
       <div className="mx-auto max-w-[820px] px-6 pt-24 pb-12">
         {/* Breadcrumb */}
@@ -185,21 +191,15 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
                 Listen
               </button>
             )}
-            <button
-              onClick={() => {
-                setShareSelection(undefined);
-                setShareOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-[12px] font-medium text-text-secondary hover:border-amber hover:text-amber transition-all font-inter"
-              aria-label="Share article"
-            >
-              <Share2 size={14} />
-              Share
-            </button>
+            <ShareDropdown
+              title={post.title}
+              url={currentUrl}
+              onToast={showToast}
+            />
           </div>
         </div>
 
-        {/* Audio player (expandable) */}
+        {/* Audio player (expandable, becomes sticky on scroll) */}
         {audioOpen && post.hasAudio && (
           <div className="mb-8 animate-in slide-in-from-top-2 fade-in duration-300">
             <AudioPlayer
@@ -231,18 +231,9 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           )}
         </article>
 
-        {/* Related content */}
+        {/* Related content — using BlogCard */}
         {post.relatedPosts && post.relatedPosts.length > 0 && (
-          <RelatedContent
-            posts={post.relatedPosts.map((p) => ({
-              slug: typeof p.slug === "string" ? p.slug : p.slug.current,
-              title: p.title,
-              excerpt: p.excerpt,
-              category: p.category,
-              readingTime: p.readingTime,
-              coverColor: p.coverColor,
-            }))}
-          />
+          <RelatedContent posts={post.relatedPosts} />
         )}
 
         {/* Back to blog */}
@@ -265,19 +256,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
       {/* Reading settings FAB */}
       <ReadingSettings />
 
-      {/* Share modal */}
-      <ShareModal
-        isOpen={shareOpen}
-        onClose={() => {
-          setShareOpen(false);
-          setShareSelection(undefined);
-        }}
-        title={post.title}
-        url={currentUrl}
-        selectedText={shareSelection}
-        onToast={showToast}
-      />
-
       {/* Selection popover */}
       <SelectionPopover
         containerSelector="[data-article-body]"
@@ -287,11 +265,7 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
       />
 
       {/* Toast */}
-      <Toast
-        message={toast.message}
-        show={toast.show}
-        onHide={hideToast}
-      />
+      <Toast message={toast.message} show={toast.show} onHide={hideToast} />
     </>
   );
 }

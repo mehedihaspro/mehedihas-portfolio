@@ -329,14 +329,24 @@ input, textarea, button, a, [role="button"] {
   color: var(--text-primary);
 }
 
-/* Focus mode — only active paragraph stays opaque */
-body.focus-mode [data-article-body] > * {
-  opacity: 0.15;
-  transition: opacity 0.4s ease;
+/* Focus mode — real reader-app style (scroll-based active paragraph) */
+body.focus-mode [data-article-body] p,
+body.focus-mode [data-article-body] h2,
+body.focus-mode [data-article-body] h3,
+body.focus-mode [data-article-body] h4,
+body.focus-mode [data-article-body] ul,
+body.focus-mode [data-article-body] ol,
+body.focus-mode [data-article-body] blockquote,
+body.focus-mode [data-article-body] pre,
+body.focus-mode [data-article-body] figure {
+  opacity: 0.2;
+  transition: opacity 0.5s ease;
+  filter: blur(0.3px);
 }
-body.focus-mode [data-article-body] > *:hover,
-body.focus-mode [data-article-body] > *:focus-within {
+
+body.focus-mode [data-article-body] [data-focus-active="true"] {
   opacity: 1;
+  filter: blur(0);
 }
 
 /* Scrollbar (webkit) */

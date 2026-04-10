@@ -67,7 +67,8 @@ export const postBySlugQuery = groq`
       publishedAt,
       readingTime,
       coverColor,
-      language
+      language,
+      enableAudio
     }
   }
 `;

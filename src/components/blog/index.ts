@@ -10,6 +10,8 @@ export { SelectionPopover } from "./selection-popover";
 export { ReadingSettings } from "./reading-settings";
 export { AudioPlayer } from "./audio-player";
 export { ShareModal } from "./share-modal";
+export { ShareDropdown } from "./share-dropdown";
+export { FocusModeController } from "./focus-mode-controller";
 export { ReferencesSection } from "./references-section";
 export { FactCheckSection } from "./fact-check-section";
 export { RelatedContent } from "./related-content";

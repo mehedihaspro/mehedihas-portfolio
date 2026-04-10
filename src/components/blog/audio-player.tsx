@@ -1,7 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, X, AudioLines, User, UserCircle2, Gauge } from "lucide-react";
+import {
+  Play,
+  Pause,
+  X,
+  AudioLines,
+  User,
+  UserCircle2,
+  Gauge,
+  Loader2,
+  SkipBack,
+  SkipForward,
+} from "lucide-react";
 
 interface AudioPlayerProps {
   title: string;
@@ -20,24 +31,45 @@ export function AudioPlayer({
   onClose,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState<string>("");
   const [voice, setVoice] = useState<Voice>("female");
   const [speed, setSpeed] = useState<Speed>(1);
   const [audioSrc, setAudioSrc] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSticky, setIsSticky] = useState(false);
+
+  // Detect when the original position scrolls out of view → become sticky
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSticky(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+      },
+      { threshold: 0, rootMargin: "0px" }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const loadAudio = async (selectedVoice: Voice) => {
     setLoading(true);
+    setLoadingStatus(
+      `Generating ${selectedVoice === "female" ? "female" : "male"} voice...`
+    );
     setError(null);
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          text: articleText.slice(0, 4900), // stay under 5k limit
+          text: articleText.slice(0, 4900),
           voice: selectedVoice,
           language,
         }),
@@ -48,8 +80,11 @@ export function AudioPlayer({
       if (!res.ok) {
         setError(data.error || "Failed to load audio");
         setLoading(false);
+        setLoadingStatus("");
         return;
       }
+
+      setLoadingStatus("Preparing playback...");
 
       // Convert base64 to blob URL
       const byteCharacters = atob(data.audioContent);
@@ -61,8 +96,11 @@ export function AudioPlayer({
       const blob = new Blob([byteArray], { type: "audio/mp3" });
       const url = URL.createObjectURL(blob);
       setAudioSrc(url);
+      setLoadingStatus("Ready");
+      setTimeout(() => setLoadingStatus(""), 800);
     } catch {
       setError("Something went wrong loading audio");
+      setLoadingStatus("");
     } finally {
       setLoading(false);
     }
@@ -81,6 +119,17 @@ export function AudioPlayer({
       }
     }
   };
+
+  // Auto-play once audio is loaded (after load from click)
+  useEffect(() => {
+    if (audioSrc && audioRef.current && !isPlaying) {
+      const timer = setTimeout(() => {
+        audioRef.current?.play().catch(() => {});
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [audioSrc]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -116,9 +165,8 @@ export function AudioPlayer({
     }
   }, [speed]);
 
-  // Reload audio when voice changes (if already loaded)
   const handleVoiceChange = async (newVoice: Voice) => {
-    if (voice === newVoice) return;
+    if (voice === newVoice || loading) return;
     setVoice(newVoice);
     if (audioRef.current) {
       audioRef.current.pause();
@@ -146,135 +194,221 @@ export function AudioPlayer({
     audioRef.current.currentTime = percent * duration;
   };
 
+  const skip = (delta: number) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = Math.max(
+      0,
+      Math.min(duration, audioRef.current.currentTime + delta)
+    );
+  };
+
   const speeds: Speed[] = [0.75, 1, 1.25, 1.5, 2];
 
   return (
-    <div className="w-full max-w-[820px] mx-auto">
-      <div className="rounded-[14px] bg-bg-subtle border border-border overflow-hidden">
-        {/* Top row: Play + info + close */}
-        <div className="flex items-center gap-3.5 px-5 py-3.5">
-          {/* Play button */}
-          <button
-            onClick={handlePlay}
-            disabled={loading}
-            className="w-[42px] h-[42px] shrink-0 rounded-full bg-amber text-white flex items-center justify-center hover:bg-amber-dark hover:scale-105 transition-all disabled:opacity-60 disabled:hover:scale-100"
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {loading ? (
-              <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            ) : isPlaying ? (
-              <Pause size={16} fill="currentColor" />
-            ) : (
-              <Play size={16} fill="currentColor" className="ml-0.5" />
-            )}
-          </button>
+    <>
+      {/* Anchor for sticky detection */}
+      <div ref={containerRef} />
 
-          {/* Title + progress */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <AudioLines size={11} className="text-amber shrink-0" />
-              <p className="text-[12px] font-semibold text-text-primary font-inter truncate">
-                {title}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0">
-                {formatTime(currentTime)}
-              </span>
-              <div
-                onClick={handleSeek}
-                className="flex-1 h-1 rounded-full bg-border cursor-pointer relative"
-              >
-                <div
-                  className="h-full rounded-full bg-amber transition-[width]"
-                  style={{
-                    width:
-                      duration > 0 ? `${(currentTime / duration) * 100}%` : "0%",
-                  }}
-                />
-              </div>
-              <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0">
-                {formatTime(duration)}
-              </span>
-            </div>
-          </div>
-
-          {/* Close */}
-          {onClose && (
+      {/* Player body */}
+      <div
+        className={`w-full transition-all duration-500 ease-out ${
+          isSticky
+            ? "fixed bottom-4 left-1/2 -translate-x-1/2 max-w-[860px] z-[998] px-4"
+            : "relative max-w-[820px] mx-auto"
+        }`}
+        style={
+          isSticky
+            ? {
+                animation: "audioSlideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+              }
+            : undefined
+        }
+      >
+        <div
+          className="rounded-[18px] bg-bg-card border border-border overflow-hidden backdrop-blur-xl"
+          style={
+            isSticky
+              ? {
+                  boxShadow:
+                    "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.08)",
+                }
+              : {
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                }
+          }
+        >
+          {/* Top row: Play + info */}
+          <div className="flex items-center gap-4 px-5 py-4">
+            {/* Play button */}
             <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-card transition-colors shrink-0"
-              aria-label="Close audio player"
+              onClick={handlePlay}
+              disabled={loading}
+              className="w-[46px] h-[46px] shrink-0 rounded-full bg-amber text-white flex items-center justify-center hover:bg-amber-dark hover:scale-105 transition-all disabled:opacity-70 disabled:hover:scale-100 shadow-[0_4px_12px_rgba(232,168,50,0.3)]"
+              aria-label={isPlaying ? "Pause" : "Play"}
             >
-              <X size={15} />
+              {loading ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : isPlaying ? (
+                <Pause size={17} fill="currentColor" />
+              ) : (
+                <Play size={17} fill="currentColor" className="ml-0.5" />
+              )}
             </button>
-          )}
-        </div>
 
-        {/* Bottom row: controls */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border bg-bg/50">
-          {/* Voice toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted font-inter">
-              Voice
-            </span>
-            <div className="flex items-center gap-1 rounded-full bg-bg border border-border p-0.5">
+            {/* Info + progress */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <AudioLines size={11} className="text-amber shrink-0" />
+                <p className="text-[12px] font-semibold text-text-primary font-inter truncate">
+                  {loadingStatus || title}
+                </p>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0 w-8">
+                  {formatTime(currentTime)}
+                </span>
+                <div
+                  onClick={handleSeek}
+                  className="flex-1 h-1 rounded-full bg-border cursor-pointer relative group"
+                >
+                  <div
+                    className="h-full rounded-full bg-amber transition-[width] duration-150"
+                    style={{
+                      width:
+                        duration > 0
+                          ? `${(currentTime / duration) * 100}%`
+                          : "0%",
+                    }}
+                  />
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{
+                      left:
+                        duration > 0
+                          ? `${(currentTime / duration) * 100}%`
+                          : "0%",
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  />
+                </div>
+                <span className="text-[10px] text-text-muted font-mono font-inter tabular-nums shrink-0 w-8 text-right">
+                  {formatTime(duration)}
+                </span>
+              </div>
+            </div>
+
+            {/* Skip buttons */}
+            <div className="flex items-center gap-1 shrink-0">
               <button
-                onClick={() => handleVoiceChange("female")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium font-inter transition-colors ${
-                  voice === "female"
-                    ? "bg-amber text-white"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
+                onClick={() => skip(-15)}
+                disabled={!audioSrc}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-subtle transition-colors disabled:opacity-40"
+                aria-label="Rewind 15 seconds"
               >
-                <UserCircle2 size={11} />
-                Female
+                <SkipBack size={15} />
               </button>
               <button
-                onClick={() => handleVoiceChange("male")}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium font-inter transition-colors ${
-                  voice === "male"
-                    ? "bg-amber text-white"
-                    : "text-text-secondary hover:text-text-primary"
-                }`}
+                onClick={() => skip(15)}
+                disabled={!audioSrc}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-subtle transition-colors disabled:opacity-40"
+                aria-label="Forward 15 seconds"
               >
-                <User size={11} />
-                Male
+                <SkipForward size={15} />
               </button>
             </div>
+
+            {/* Close */}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-subtle transition-colors shrink-0"
+                aria-label="Close audio player"
+              >
+                <X size={15} />
+              </button>
+            )}
           </div>
 
-          {/* Speed */}
-          <div className="flex items-center gap-2">
-            <Gauge size={12} className="text-text-muted" />
-            <div className="flex items-center gap-0.5 rounded-full bg-bg border border-border p-0.5">
-              {speeds.map((s) => (
+          {/* Bottom controls */}
+          <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border bg-bg-subtle/40">
+            {/* Voice toggle */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter">
+                Voice
+              </span>
+              <div className="flex items-center gap-1 rounded-full bg-bg border border-border p-0.5">
                 <button
-                  key={s}
-                  onClick={() => setSpeed(s)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono font-inter transition-colors ${
-                    speed === s
-                      ? "bg-amber text-white"
+                  onClick={() => handleVoiceChange("female")}
+                  disabled={loading}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium font-inter transition-all disabled:opacity-50 ${
+                    voice === "female"
+                      ? "bg-amber text-white shadow-sm"
                       : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
-                  {s}x
+                  <UserCircle2 size={11} />
+                  Female
                 </button>
-              ))}
+                <button
+                  onClick={() => handleVoiceChange("male")}
+                  disabled={loading}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium font-inter transition-all disabled:opacity-50 ${
+                    voice === "male"
+                      ? "bg-amber text-white shadow-sm"
+                      : "text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  <User size={11} />
+                  Male
+                </button>
+              </div>
+            </div>
+
+            {/* Speed */}
+            <div className="flex items-center gap-2">
+              <Gauge size={12} className="text-text-muted" />
+              <div className="flex items-center gap-0.5 rounded-full bg-bg border border-border p-0.5">
+                {speeds.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSpeed(s)}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono font-inter transition-colors ${
+                      speed === s
+                        ? "bg-amber text-white"
+                        : "text-text-secondary hover:text-text-primary"
+                    }`}
+                  >
+                    {s}x
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        {error && (
-          <div className="px-5 py-2 text-[11px] text-red-500 bg-red-500/10 border-t border-red-500/20 font-inter">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="px-5 py-2 text-[11px] text-red-500 bg-red-500/10 border-t border-red-500/20 font-inter">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
 
       {audioSrc && (
         <audio ref={audioRef} src={audioSrc} preload="auto" className="hidden" />
       )}
-    </div>
+
+      <style jsx>{`
+        @keyframes audioSlideUp {
+          from {
+            opacity: 0;
+            transform: translate(-50%, 20px);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, 0);
+          }
+        }
+      `}</style>
+    </>
   );
 }
