@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
   title: "About",
@@ -65,16 +66,10 @@ const CURRENTLY = [
 
 export default function AboutPage() {
   return (
-    <div className="mx-auto max-w-[820px] px-6 py-20">
-      {/* Header */}
-      <section className="pt-8 pb-12">
-        <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-          About
-        </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight mb-6">
-          Hey, I&apos;m Mehedi
-        </h1>
+    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <PageHeader title="Hey, I'm Mehedi" breadcrumbLabel="About" />
 
+      <section className="px-6 max-w-[820px]">
         {/* Avatar */}
         <div className="w-20 h-20 rounded-2xl bg-bg-subtle border border-border mb-8" />
 

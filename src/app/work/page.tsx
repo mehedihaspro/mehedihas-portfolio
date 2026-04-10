@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { sanityClient } from "@/lib/sanity/client";
 import { allProjectsQuery } from "@/lib/sanity/queries";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -50,15 +51,11 @@ export default async function WorkPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 py-20">
-      <section className="pt-8 pb-12">
-        <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-          Portfolio
-        </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight mb-4">
-          Selected Work
-        </h1>
-        <p className="text-lg text-text-secondary max-w-xl leading-relaxed">
+    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <PageHeader title="Selected Work" breadcrumbLabel="Work" />
+
+      <section className="px-6 pb-8">
+        <p className="text-[16px] text-text-secondary max-w-xl leading-relaxed font-inter">
           Case studies and projects in product design, design systems, and
           user experience.
         </p>

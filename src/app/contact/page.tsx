@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({
@@ -19,14 +20,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="mx-auto max-w-[680px] px-6 py-20">
-      <section className="pt-8 pb-12">
-        <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-          Contact
-        </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight mb-4">
-          Let&apos;s talk
-        </h1>
+    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <PageHeader title="Let's talk" breadcrumbLabel="Contact" />
+
+      <section className="px-6 pb-8 max-w-[680px]">
         <p className="text-lg text-text-secondary leading-relaxed">
           Have a project in mind, want mentorship, or just want to say hello?
           I&apos;d love to hear from you.
@@ -34,7 +31,7 @@ export default function ContactPage() {
       </section>
 
       {/* Quick links */}
-      <section className="pb-10">
+      <section className="px-6 pb-10 max-w-[680px]">
         <div className="grid sm:grid-cols-3 gap-3">
           {[
             { label: "Email", value: "hello@mehedihas.pro", href: "mailto:hello@mehedihas.pro" },
@@ -60,7 +57,7 @@ export default function ContactPage() {
       </section>
 
       {/* Form */}
-      <section className="py-10 border-t border-border">
+      <section className="px-6 py-10 border-t border-border max-w-[680px]">
         {status === "sent" ? (
           <div className="text-center py-12">
             <div className="w-14 h-14 rounded-2xl bg-highlight-bg flex items-center justify-center mx-auto mb-4">

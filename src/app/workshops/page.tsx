@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
   title: "Workshops",
@@ -55,15 +56,11 @@ const PAST = [
 
 export default function WorkshopsPage() {
   return (
-    <div className="mx-auto max-w-[1200px] px-6 py-20">
-      <section className="pt-8 pb-12">
-        <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-          Learn
-        </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight mb-4">
-          Workshops & Courses
-        </h1>
-        <p className="text-lg text-text-secondary max-w-xl leading-relaxed">
+    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <PageHeader title="Workshops & Courses" breadcrumbLabel="Workshops" />
+
+      <section className="px-6 pb-8">
+        <p className="text-[16px] text-text-secondary max-w-xl leading-relaxed font-inter">
           Practical, hands-on learning for designers at every level. Free
           workshops, live sessions, and community.
         </p>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 
 export const metadata: Metadata = {
   title: "Newsletter",
@@ -41,17 +42,10 @@ const PAST_ISSUES = [
 
 export default function NewsletterPage() {
   return (
-    <div className="mx-auto max-w-[820px] px-6 py-20">
-      {/* Hero */}
-      <section className="pt-8 pb-12 text-center">
-        <p className="text-[11px] font-semibold text-amber uppercase tracking-[0.14em] mb-3">
-          Newsletter
-        </p>
-        <h1 className="text-4xl md:text-5xl font-bold text-text-primary leading-[1.1] tracking-tight mb-4">
-          Design insights,
-          <br />
-          delivered weekly.
-        </h1>
+    <div className="mx-auto max-w-[1440px] px-20 pb-12">
+      <PageHeader title="Newsletter" />
+
+      <section className="px-6 pb-12 text-center max-w-[820px] mx-auto">
         <p className="text-lg text-text-secondary max-w-md mx-auto leading-relaxed mb-8">
           Every week I share thoughts on design psychology, product thinking,
           and creativity — in Bangla and English.

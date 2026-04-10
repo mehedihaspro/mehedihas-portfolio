@@ -6,6 +6,7 @@ import { LanguageFilter } from "@/components/blog/language-filter";
 import { NewsletterSidebar } from "@/components/blog/newsletter-sidebar";
 import { Pagination } from "@/components/blog/pagination";
 import { Divider } from "@/components/ui/divider";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface Post {
   slug: string;
@@ -58,21 +59,10 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
 
   return (
     <div className="mx-auto max-w-[1440px] px-20 pb-12">
-      {/* Header */}
-      <section className="rounded-[14px] px-6 pt-6 pb-8 mb-8">
-        {/* Breadcrumb */}
-        <div className="flex flex-col mb-6">
-          <p className="text-[16px] font-normal text-text-primary leading-[24px] font-inter mb-1">
-            <span>Home - </span>
-            <span className="text-amber">Blog</span>
-          </p>
-          <h1 className="font-display font-bold text-[128px] leading-[110px] tracking-[-10.24px] text-[#36322d]">
-            Writing &Thinking
-          </h1>
-        </div>
+      <PageHeader title="Writing &Thinking" breadcrumbLabel="Blog" />
 
-        <Divider variant="solid" className="mb-6" />
-
+      {/* Filters section */}
+      <section className="px-6 mb-8">
         {/* Language + Category filter */}
         <LanguageFilter
           categories={categories}
