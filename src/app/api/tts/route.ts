@@ -4,29 +4,53 @@ import { rateLimit, getClientId } from "@/lib/rate-limit";
 const GOOGLE_TTS_API_KEY = process.env.GOOGLE_TTS_API_KEY;
 const GOOGLE_TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize";
 
-// Best Bangla voices from Google Cloud TTS
+// Voice selection: WaveNet is the sweet spot for Bangla — clean pronunciation
+// and fast generation (≈1–2s). Chirp 3 HD sounds even more natural but takes
+// 30+ seconds for long text, which is too slow for real-time playback.
+// bn-IN-Wavenet-C is the warmest Bangla female voice in Google's catalog.
 const VOICES = {
-  female: {
+  bangla: {
     languageCode: "bn-IN",
-    name: "bn-IN-Wavenet-A",
-    ssmlGender: "FEMALE",
+    name: "bn-IN-Wavenet-C",
+    ssmlGender: "FEMALE" as const,
   },
-  male: {
-    languageCode: "bn-IN",
-    name: "bn-IN-Wavenet-B",
-    ssmlGender: "MALE",
-  },
-  femaleEn: {
+  english: {
     languageCode: "en-US",
     name: "en-US-Neural2-F",
-    ssmlGender: "FEMALE",
-  },
-  maleEn: {
-    languageCode: "en-US",
-    name: "en-US-Neural2-D",
-    ssmlGender: "MALE",
+    ssmlGender: "FEMALE" as const,
   },
 } as const;
+
+// Google Cloud TTS has a 5000-byte limit per request. Bangla is ~3 bytes
+// per character in UTF-8, so a naive character slice overflows fast. Trim
+// by byte length and back up to the nearest whitespace so we don't cut a
+// word in half.
+const MAX_REQUEST_BYTES = 4800;
+
+function truncateToBytes(input: string, maxBytes: number): string {
+  const encoder = new TextEncoder();
+  const encoded = encoder.encode(input);
+  if (encoded.length <= maxBytes) return input;
+
+  // Decode a safe prefix (stopOnError ensures we don't split a multibyte char)
+  const decoder = new TextDecoder("utf-8");
+  let truncated = decoder.decode(encoded.slice(0, maxBytes), { stream: false });
+
+  // Back up to the last sentence or word boundary for a cleaner cut
+  const lastSentence = Math.max(
+    truncated.lastIndexOf("।"),
+    truncated.lastIndexOf("."),
+    truncated.lastIndexOf("?"),
+    truncated.lastIndexOf("!")
+  );
+  if (lastSentence > truncated.length * 0.6) {
+    truncated = truncated.slice(0, lastSentence + 1);
+  } else {
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 0) truncated = truncated.slice(0, lastSpace);
+  }
+  return truncated;
+}
 
 export async function POST(request: NextRequest) {
   // Rate limit: 20 TTS requests per IP per 15 minutes (guards Google Cloud billing)
@@ -49,7 +73,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { text, voice = "female", language = "BANGLA" } = await request.json();
+    const { text, language = "BANGLA" } = await request.json();
 
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
@@ -62,25 +86,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (text.length > 5000) {
+    // Hard cap the raw input so we don't allocate absurd buffers
+    if (text.length > 20000) {
       return NextResponse.json(
-        { error: "Text exceeds 5000 character limit." },
+        { error: "Text is too long." },
         { status: 400 }
       );
     }
 
-    const voiceKey =
-      language === "ENGLISH"
-        ? voice === "male"
-          ? "maleEn"
-          : "femaleEn"
-        : voice === "male"
-        ? "male"
-        : "female";
+    // Truncate to Google's 5000-byte limit (Chirp 3 HD + most voices)
+    const safeText = truncateToBytes(text, MAX_REQUEST_BYTES);
 
-    const selectedVoice = VOICES[voiceKey];
+    const selectedVoice =
+      language === "ENGLISH" ? VOICES.english : VOICES.bangla;
 
-    // 15s timeout for TTS
+    // 15s timeout — Wavenet finishes in ~1–2s for 5k bytes
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15_000);
 
@@ -93,7 +113,7 @@ export async function POST(request: NextRequest) {
           "X-Goog-Api-Key": GOOGLE_TTS_API_KEY,
         },
         body: JSON.stringify({
-          input: { text },
+          input: { text: safeText },
           voice: {
             languageCode: selectedVoice.languageCode,
             name: selectedVoice.name,
