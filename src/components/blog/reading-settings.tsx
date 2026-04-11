@@ -82,15 +82,39 @@ const CONTENT_WIDTHS = [
 type FontFamily = (typeof FONT_FAMILIES)[number]["value"];
 type ContentWidth = (typeof CONTENT_WIDTHS)[number]["value"];
 
+function readStored<T>(key: string, fallback: T, transform: (v: string) => T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw == null ? fallback : transform(raw);
+  } catch {
+    return fallback;
+  }
+}
+
 export function ReadingSettings() {
   const { theme, setTheme } = useTheme();
   const isNearFooter = useFooterVisibility();
   const [isOpen, setIsOpen] = useState(false);
-  const [fontSize, setFontSize] = useState(18);
-  const [lineHeight, setLineHeight] = useState(1.9);
-  const [focusMode, setFocusMode] = useState(false);
-  const [fontFamily, setFontFamily] = useState<FontFamily>("sans");
-  const [contentWidth, setContentWidth] = useState<ContentWidth>("default");
+  const [fontSize, setFontSize] = useState<number>(() =>
+    readStored(STORAGE_KEY_FONT_SIZE, 18, Number)
+  );
+  const [lineHeight, setLineHeight] = useState<number>(() =>
+    readStored(STORAGE_KEY_LINE_HEIGHT, 1.9, Number)
+  );
+  const [focusMode, setFocusMode] = useState<boolean>(() =>
+    readStored(STORAGE_KEY_FOCUS, false, (v) => v === "true")
+  );
+  const [fontFamily, setFontFamily] = useState<FontFamily>(() =>
+    readStored<FontFamily>(STORAGE_KEY_FONT_FAMILY, "sans", (v) => v as FontFamily)
+  );
+  const [contentWidth, setContentWidth] = useState<ContentWidth>(() =>
+    readStored<ContentWidth>(
+      STORAGE_KEY_CONTENT_WIDTH,
+      "default",
+      (v) => v as ContentWidth
+    )
+  );
 
   const applySettings = useCallback(() => {
     const article = document.querySelector(
@@ -108,29 +132,21 @@ export function ReadingSettings() {
     if (widthDef) article.style.maxWidth = widthDef.width;
   }, [fontSize, lineHeight, fontFamily, contentWidth]);
 
+  // Sync focus mode state to the body class on mount + whenever it changes.
   useEffect(() => {
-    const savedFontSize = localStorage.getItem(STORAGE_KEY_FONT_SIZE);
-    const savedLineHeight = localStorage.getItem(STORAGE_KEY_LINE_HEIGHT);
-    const savedFocus = localStorage.getItem(STORAGE_KEY_FOCUS);
-    const savedFontFamily = localStorage.getItem(STORAGE_KEY_FONT_FAMILY);
-    const savedContentWidth = localStorage.getItem(STORAGE_KEY_CONTENT_WIDTH);
-
-    if (savedFontSize) setFontSize(Number(savedFontSize));
-    if (savedLineHeight) setLineHeight(Number(savedLineHeight));
-    if (savedFocus === "true") {
-      setFocusMode(true);
-      document.body.classList.add("focus-mode");
-    }
-    if (savedFontFamily) setFontFamily(savedFontFamily as FontFamily);
-    if (savedContentWidth) setContentWidth(savedContentWidth as ContentWidth);
-  }, []);
+    document.body.classList.toggle("focus-mode", focusMode);
+  }, [focusMode]);
 
   useEffect(() => {
     applySettings();
-    localStorage.setItem(STORAGE_KEY_FONT_SIZE, String(fontSize));
-    localStorage.setItem(STORAGE_KEY_LINE_HEIGHT, String(lineHeight));
-    localStorage.setItem(STORAGE_KEY_FONT_FAMILY, fontFamily);
-    localStorage.setItem(STORAGE_KEY_CONTENT_WIDTH, contentWidth);
+    try {
+      localStorage.setItem(STORAGE_KEY_FONT_SIZE, String(fontSize));
+      localStorage.setItem(STORAGE_KEY_LINE_HEIGHT, String(lineHeight));
+      localStorage.setItem(STORAGE_KEY_FONT_FAMILY, fontFamily);
+      localStorage.setItem(STORAGE_KEY_CONTENT_WIDTH, contentWidth);
+    } catch {
+      // ignore
+    }
   }, [fontSize, lineHeight, fontFamily, contentWidth, applySettings]);
 
   const adjustFontSize = (delta: number) => {

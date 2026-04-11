@@ -14,10 +14,17 @@ const TIERS = [
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const score = Number.parseInt(searchParams.get("score") || "0", 10);
-    const total = Number.parseInt(searchParams.get("total") || "5", 10);
-    const title = (searchParams.get("title") || "Blog Quiz").slice(0, 80);
-    const name = searchParams.get("name")?.slice(0, 40);
+    const rawScore = Number.parseInt(searchParams.get("score") || "0", 10);
+    const rawTotal = Number.parseInt(searchParams.get("total") || "5", 10);
+    // Clamp to sane ranges
+    const score = Math.max(0, Math.min(100, Number.isFinite(rawScore) ? rawScore : 0));
+    const total = Math.max(1, Math.min(100, Number.isFinite(rawTotal) ? rawTotal : 5));
+    // Strip control chars then slice
+    const sanitize = (s: string, max: number) =>
+      s.replace(/[\u0000-\u001F\u007F<>]/g, "").slice(0, max);
+    const title = sanitize(searchParams.get("title") || "Blog Quiz", 80);
+    const rawName = searchParams.get("name");
+    const name = rawName ? sanitize(rawName, 40) : undefined;
 
     const percent = Math.round((score / total) * 100) || 0;
     const tier = TIERS.find((t) => percent >= t.min) || TIERS[TIERS.length - 1];

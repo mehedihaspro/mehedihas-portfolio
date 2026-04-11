@@ -9,8 +9,16 @@ export default function SiteLayout({
 }>) {
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[1100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-amber focus:text-white focus:text-sm focus:font-semibold"
+      >
+        Skip to main content
+      </a>
       <Navbar />
-      <main className="flex-1 pt-14">{children}</main>
+      <main id="main-content" className="flex-1 pt-14">
+        {children}
+      </main>
       <Footer />
       <ThemeFab />
     </>

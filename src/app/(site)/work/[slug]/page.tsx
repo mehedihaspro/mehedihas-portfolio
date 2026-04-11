@@ -33,7 +33,7 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
 
   if (!project) notFound();
 
-  const coverColor = project.coverColor ? `bg-[${project.coverColor}]` : "bg-bg-subtle";
+  const coverColor: string = project.coverColor || "";
 
   return (
     <div className="mx-auto max-w-[820px] px-6 py-20">
@@ -63,7 +63,10 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
       </header>
 
       {/* ========== THUMBNAIL / COVER ========== */}
-      <div className={`w-full aspect-[2.2/1] rounded-2xl ${coverColor} mb-10`} />
+      <div
+        className="w-full aspect-[2.2/1] rounded-2xl bg-bg-subtle mb-10"
+        style={coverColor ? { backgroundColor: coverColor } : undefined}
+      />
 
       {/* ========== OVERVIEW ========== */}
       {project.overview && (

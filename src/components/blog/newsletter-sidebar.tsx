@@ -64,7 +64,7 @@ export function NewsletterSidebar() {
               height={48}
               className="h-12 w-auto"
             />
-            <div className="flex flex-col gap-1 items-center text-center w-full text-[#36322d]">
+            <div className="flex flex-col gap-1 items-center text-center w-full text-ink-display">
               <h3 className="font-display text-[36px] font-bold leading-[44px] tracking-[-2.88px]">
                 A weekly design note
               </h3>
@@ -77,7 +77,7 @@ export function NewsletterSidebar() {
 
         {/* Email form */}
         {status === "success" ? (
-          <div className="text-center py-6 w-full">
+          <div className="text-center py-6 w-full" role="status" aria-live="polite">
             <div className="w-12 h-12 rounded-full bg-highlight-bg flex items-center justify-center mx-auto mb-3">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="text-amber">
                 <path d="M4 10l4 4 8-9" />
@@ -140,7 +140,7 @@ export function NewsletterSidebar() {
 
               {/* Error message */}
               {status === "error" && errorMsg && (
-                <p className="text-[12px] text-[#c0392b] font-inter mt-1.5 font-medium">
+                <p className="text-[12px] text-error font-inter mt-1.5 font-medium" role="alert">
                   {errorMsg}
                 </p>
               )}

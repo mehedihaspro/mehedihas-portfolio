@@ -14,14 +14,19 @@ export function Toast({ message, show, onHide, type = "success" }: ToastProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (show) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-        setTimeout(onHide, 300);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
+    if (!show) return;
+
+    // Defer visibility toggle to next frame so the slide-in animation runs.
+    const enterRaf = requestAnimationFrame(() => setVisible(true));
+    const timer = setTimeout(() => {
+      setVisible(false);
+      setTimeout(onHide, 300);
+    }, 2000);
+
+    return () => {
+      cancelAnimationFrame(enterRaf);
+      clearTimeout(timer);
+    };
   }, [show, onHide]);
 
   if (!show) return null;

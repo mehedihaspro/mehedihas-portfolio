@@ -50,9 +50,7 @@ export default async function BlogPage() {
           date: formatDate(post.publishedAt),
           readingTime: post.readingTime || "5 min read",
           hasAudio: !!post.enableAudio || !!post.audioUrl,
-          coverColor: post.coverColor
-            ? `bg-[${post.coverColor}]`
-            : "bg-bg-subtle",
+          coverColor: post.coverColor || "",
           language: post.language || "BANGLA",
         })
       );

@@ -32,6 +32,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mehedihas.pro"),
   title: {
     default: "mehedihas — Product Designer, Author & Mentor",
     template: "%s | mehedihas",
@@ -46,6 +47,14 @@ export const metadata: Metadata = {
     "author",
     "design blog",
   ],
+  openGraph: {
+    type: "website",
+    siteName: "mehedihas",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({
@@ -55,7 +64,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="bn"
+      lang="en"
       className={`${inter.variable} ${hindSiliguri.variable} ${amaticaSC.variable} ${caveat.variable} h-full`}
       suppressHydrationWarning
     >

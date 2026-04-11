@@ -67,13 +67,16 @@ export function ThemeFab() {
     <>
       {/* Floating action button */}
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[997] w-12 h-12 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-primary hover:text-amber transition-all duration-300 hover:scale-105 ${
           shouldHide
             ? "opacity-0 translate-y-6 pointer-events-none"
             : "opacity-100 translate-y-0"
         }`}
-        aria-label="Change theme"
+        aria-label={`Change theme, current: ${current.label}`}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.1)" }}
       >
         {isOpen ? <X size={17} /> : <FabIcon size={17} strokeWidth={1.8} />}
@@ -86,9 +89,12 @@ export function ThemeFab() {
           <div
             className="fixed inset-0 z-[996]"
             onClick={() => setIsOpen(false)}
+            aria-hidden="true"
           />
 
           <div
+            role="menu"
+            aria-label="Theme options"
             className="fixed bottom-[72px] right-4 md:bottom-24 md:right-8 z-[997] w-[272px] rounded-[20px] bg-bg-card animate-in fade-in slide-in-from-bottom-3 duration-200 overflow-hidden"
             style={{
               boxShadow:
@@ -109,6 +115,9 @@ export function ThemeFab() {
                 const active = theme === t.value;
                 return (
                   <button
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={active}
                     key={t.value}
                     onClick={() => {
                       setTheme(t.value);

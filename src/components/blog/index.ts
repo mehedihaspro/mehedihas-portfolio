@@ -1,16 +1,13 @@
 export { BlogCard } from "./blog-card";
 export { LanguageFilter } from "./language-filter";
-export { SearchBar } from "./search-bar";
-export { NewsletterInline } from "./newsletter-inline";
 export { NewsletterSidebar } from "./newsletter-sidebar";
 export { Pagination } from "./pagination";
-export { CategoryFilter } from "./category-filter";
 export { Toast } from "./toast";
 export { SelectionPopover } from "./selection-popover";
 export { ReadingSettings } from "./reading-settings";
 export { AudioPlayer } from "./audio-player";
-export { ShareModal } from "./share-modal";
 export { ShareDropdown } from "./share-dropdown";
+export { SubscribeModal } from "./subscribe-modal";
 export { FocusModeController } from "./focus-mode-controller";
 export { ReferencesSection } from "./references-section";
 export { FactCheckSection } from "./fact-check-section";

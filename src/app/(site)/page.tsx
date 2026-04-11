@@ -2,13 +2,9 @@ import Link from "next/link";
 import { AudioLines, ArrowRight } from "lucide-react";
 import { sanityClient } from "@/lib/sanity/client";
 import { featuredPostsQuery, allProjectsQuery, authorQuery } from "@/lib/sanity/queries";
+import { NewsletterSidebar } from "@/components/blog/newsletter-sidebar";
 
 export const revalidate = 60;
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
 
 export default async function HomePage() {
   let posts: Array<{ slug: string; title: string; category: string; readingTime: string; hasAudio: boolean }> = [];
@@ -38,7 +34,7 @@ export default async function HomePage() {
         title: p.title,
         description: p.overview || "",
         role: p.role || "Designer",
-        coverColor: p.coverColor ? `bg-[${p.coverColor}]` : "bg-bg-subtle",
+        coverColor: p.coverColor || "",
       }));
     }
 
@@ -124,7 +120,14 @@ export default async function HomePage() {
             {projects.map((project) => (
               <Link key={project.slug} href={`/work/${project.slug}`} className="group block">
                 <div className="rounded-2xl overflow-hidden bg-bg-card border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                  <div className={`aspect-[16/10] ${project.coverColor} relative`}>
+                  <div
+                    className="aspect-[16/10] relative bg-bg-subtle"
+                    style={
+                      project.coverColor
+                        ? { backgroundColor: project.coverColor }
+                        : undefined
+                    }
+                  >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                   <div className="p-5 md:p-6">
@@ -175,27 +178,10 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Newsletter CTA */}
-      <section className="py-16 border-t border-border">
-        <div className="rounded-2xl bg-bg-card border border-border p-8 md:p-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-text-primary mb-3">
-            Design insights, delivered.
-          </h2>
-          <p className="text-base text-text-secondary max-w-md mx-auto mb-6">
-            Join designers and creators who read my weekly newsletter on design
-            thinking, psychology, and building products.
-          </p>
-          <div className="flex items-center justify-center gap-3 max-w-sm mx-auto">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="flex-1 h-11 px-4 rounded-xl bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-amber focus:ring-2 focus:ring-highlight-bg transition-all"
-              readOnly
-            />
-            <button className="h-11 px-6 rounded-xl bg-amber text-white text-sm font-semibold hover:bg-amber-dark transition-colors shrink-0">
-              Subscribe
-            </button>
-          </div>
+      {/* Newsletter CTA — real working form */}
+      <section className="py-16 border-t border-border flex justify-center">
+        <div className="w-full max-w-[416px]">
+          <NewsletterSidebar />
         </div>
       </section>
 

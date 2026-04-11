@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 
 type Theme = "light" | "sepia" | "dark" | "night";
 
@@ -15,24 +15,37 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_ORDER: Theme[] = ["light", "sepia", "dark", "night"];
 const STORAGE_KEY = "mehedihas-theme";
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
+function readStoredTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  try {
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored && THEME_ORDER.includes(stored)) {
-      setThemeState(stored);
-    }
-    setMounted(true);
-  }, []);
+    if (stored && THEME_ORDER.includes(stored)) return stored;
+  } catch {
+    // ignore — localStorage may be unavailable
+  }
+  return "light";
+}
 
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Lazy init reads from localStorage once during the first client render.
+  // The inline script in root layout has already set the data-theme attr
+  // before React hydrates, so there's no FOUC.
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
+  const isFirstRender = useRef(true);
+
+  // Sync DOM + localStorage whenever the user changes theme (not on mount).
   useEffect(() => {
-    if (mounted) {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem(STORAGE_KEY, theme);
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-  }, [theme, mounted]);
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // ignore
+    }
+  }, [theme]);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
@@ -44,11 +57,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return THEME_ORDER[(idx + 1) % THEME_ORDER.length];
     });
   }, []);
-
-  // Prevent flash of wrong theme
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, cycleTheme }}>

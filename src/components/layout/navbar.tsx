@@ -19,13 +19,16 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[999] backdrop-blur-xl bg-bg-nav border-b border-border">
+    <nav
+      aria-label="Primary"
+      className="fixed top-0 left-0 right-0 z-[999] backdrop-blur-xl bg-bg-nav border-b border-border"
+    >
       <div className="mx-auto max-w-[1200px] px-6 flex items-center justify-between h-14">
         {/* Logo */}
-        <Link href="/" className="shrink-0">
+        <Link href="/" className="shrink-0" aria-label="mehedihas — home">
           <Image
             src="/logo.svg"
-            alt="mehedihas"
+            alt=""
             width={59}
             height={48}
             className="h-7 w-auto"
@@ -34,7 +37,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-1">
+        <ul className="hidden md:flex items-center gap-1 list-none">
           {NAV_LINKS.map((link) => {
             const isActive =
               link.href === "/"
@@ -42,28 +45,33 @@ export function Navbar() {
                 : pathname.startsWith(link.href);
 
             return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-amber bg-highlight-bg"
-                    : "text-text-secondary hover:text-text-primary hover:bg-bg-subtle"
-                }`}
-              >
-                {link.label}
-              </Link>
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "text-amber bg-highlight-bg"
+                      : "text-text-secondary hover:text-text-primary hover:bg-bg-subtle"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              </li>
             );
           })}
-        </div>
+        </ul>
 
         {/* Right side: Mobile toggle */}
         <div className="flex items-center gap-2">
           {/* Mobile hamburger */}
           <button
+            type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-bg-subtle text-text-secondary"
-            aria-label="Toggle menu"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-bg-subtle text-text-secondary"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -72,8 +80,11 @@ export function Navbar() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-bg-nav backdrop-blur-xl">
-          <div className="px-4 py-3 flex flex-col gap-1">
+        <div
+          id="mobile-nav"
+          className="md:hidden border-t border-border bg-bg-nav backdrop-blur-xl"
+        >
+          <ul className="px-4 py-3 flex flex-col gap-1 list-none">
             {NAV_LINKS.map((link) => {
               const isActive =
                 link.href === "/"
@@ -81,21 +92,23 @@ export function Navbar() {
                   : pathname.startsWith(link.href);
 
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-amber bg-highlight-bg"
-                      : "text-text-secondary hover:text-text-primary hover:bg-bg-subtle"
-                  }`}
-                >
-                  {link.label}
-                </Link>
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`block px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "text-amber bg-highlight-bg"
+                        : "text-text-secondary hover:text-text-primary hover:bg-bg-subtle"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       )}
     </nav>

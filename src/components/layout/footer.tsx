@@ -15,7 +15,7 @@ export function Footer() {
         />
 
         {/* Let's Talk + Email */}
-        <div className="flex flex-col gap-1 md:gap-2 items-center text-center text-[#36322d] font-display font-bold">
+        <div className="flex flex-col gap-1 md:gap-2 items-center text-center text-ink-display font-display font-bold">
           <p className="text-[28px] md:text-[36px] leading-[32px] md:leading-[44px] tracking-[-1.5px] md:tracking-[-2.88px]">
             Let&apos;s talk
           </p>

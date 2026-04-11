@@ -28,7 +28,7 @@ export function PageHeader({
       )}
 
       {/* Page title — Amatic SC Bold, responsive */}
-      <h1 className="font-display font-bold text-[clamp(52px,9vw,128px)] leading-[0.88] tracking-[-0.06em] text-[#36322d] mb-5 md:mb-6">
+      <h1 className="font-display font-bold text-[clamp(52px,9vw,128px)] leading-[0.88] tracking-[-0.06em] text-ink-display mb-5 md:mb-6">
         {title}
       </h1>
 

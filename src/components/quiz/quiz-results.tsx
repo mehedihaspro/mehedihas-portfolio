@@ -160,8 +160,8 @@ export function QuizResults({
         <div className="grid grid-cols-2 gap-3 mb-8">
           <div className="rounded-[14px] bg-bg-card border border-border p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-[#2E7D32]/15 flex items-center justify-center">
-                <Check size={12} className="text-[#2E7D32]" strokeWidth={3} />
+              <div className="w-6 h-6 rounded-full bg-success-soft flex items-center justify-center">
+                <Check size={12} className="text-success" strokeWidth={3} />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter">
                 Correct
@@ -173,8 +173,8 @@ export function QuizResults({
           </div>
           <div className="rounded-[14px] bg-bg-card border border-border p-5">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-[#C0392B]/15 flex items-center justify-center">
-                <X size={12} className="text-[#C0392B]" strokeWidth={3} />
+              <div className="w-6 h-6 rounded-full bg-error-soft flex items-center justify-center">
+                <X size={12} className="text-error" strokeWidth={3} />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-text-muted font-inter">
                 Wrong
@@ -235,15 +235,15 @@ export function QuizResults({
                     key={q._key || qIdx}
                     className={`rounded-[14px] border-2 p-5 ${
                       isCorrect
-                        ? "border-[#2E7D32]/20 bg-[#2E7D32]/5"
-                        : "border-[#C0392B]/20 bg-[#C0392B]/5"
+                        ? "border-success/20 bg-success-soft"
+                        : "border-error/20 bg-error-soft"
                     }`}
                   >
                     {/* Question header */}
                     <div className="flex items-start gap-3 mb-4">
                       <div
                         className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-                          isCorrect ? "bg-[#2E7D32]" : "bg-[#C0392B]"
+                          isCorrect ? "bg-success" : "bg-error"
                         }`}
                       >
                         {isCorrect ? (
@@ -269,7 +269,7 @@ export function QuizResults({
                       </p>
                       <p
                         className={`text-[14px] leading-relaxed font-inter ${
-                          isCorrect ? "text-[#2E7D32]" : "text-[#C0392B]"
+                          isCorrect ? "text-success" : "text-error"
                         }`}
                       >
                         {selectedOption?.text || "—"}
@@ -282,7 +282,7 @@ export function QuizResults({
                         <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-text-muted mb-1 font-inter">
                           Correct answer
                         </p>
-                        <p className="text-[14px] text-[#2E7D32] leading-relaxed font-inter">
+                        <p className="text-[14px] text-success leading-relaxed font-inter">
                           {correctOption.text}
                         </p>
                       </div>

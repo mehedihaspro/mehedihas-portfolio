@@ -43,7 +43,7 @@ export default async function WorkPage() {
         client: p.client || "",
         year: p.year || "",
         tags: p.tags || [],
-        coverColor: p.coverColor ? `bg-[${p.coverColor}]` : "bg-bg-subtle",
+        coverColor: p.coverColor || "",
       }));
     }
   } catch {
@@ -85,9 +85,14 @@ export default async function WorkPage() {
                 }`}
               >
                 <div
-                  className={`aspect-[16/10] md:aspect-auto ${project.coverColor} relative min-h-[280px] ${
+                  className={`aspect-[16/10] md:aspect-auto relative min-h-[280px] bg-bg-subtle ${
                     index % 2 === 1 ? "md:col-start-2" : ""
                   }`}
+                  style={
+                    project.coverColor
+                      ? { backgroundColor: project.coverColor }
+                      : undefined
+                  }
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>

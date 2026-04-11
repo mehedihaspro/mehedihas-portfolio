@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit, getClientId } from "@/lib/rate-limit";
 
 const GOOGLE_TTS_API_KEY = process.env.GOOGLE_TTS_API_KEY;
 const GOOGLE_TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize";
 
 // Best Bangla voices from Google Cloud TTS
-// bn-IN voices are Indian Bangla, most accurate for South Asian audiences
 const VOICES = {
   female: {
     languageCode: "bn-IN",
@@ -16,7 +16,6 @@ const VOICES = {
     name: "bn-IN-Wavenet-B",
     ssmlGender: "MALE",
   },
-  // English fallbacks for English content
   femaleEn: {
     languageCode: "en-US",
     name: "en-US-Neural2-F",
@@ -30,14 +29,30 @@ const VOICES = {
 } as const;
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 TTS requests per IP per 15 minutes (guards Google Cloud billing)
+  const clientId = getClientId(request);
+  const rl = rateLimit(`tts:${clientId}`, {
+    limit: 20,
+    windowMs: 15 * 60 * 1000,
+  });
+
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many audio requests. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+        },
+      }
+    );
+  }
+
   try {
     const { text, voice = "female", language = "BANGLA" } = await request.json();
 
     if (!text || typeof text !== "string") {
-      return NextResponse.json(
-        { error: "Text is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Text is required" }, { status: 400 });
     }
 
     if (!GOOGLE_TTS_API_KEY) {
@@ -47,18 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Google TTS has a 5000 character limit per request
     if (text.length > 5000) {
       return NextResponse.json(
-        {
-          error:
-            "Text exceeds 5000 character limit. Please break into chunks.",
-        },
+        { error: "Text exceeds 5000 character limit." },
         { status: 400 }
       );
     }
 
-    // Select voice based on language and gender
     const voiceKey =
       language === "ENGLISH"
         ? voice === "male"
@@ -70,11 +80,18 @@ export async function POST(request: NextRequest) {
 
     const selectedVoice = VOICES[voiceKey];
 
-    const response = await fetch(
-      `${GOOGLE_TTS_URL}?key=${GOOGLE_TTS_API_KEY}`,
-      {
+    // 15s timeout for TTS
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+
+    let response: Response;
+    try {
+      response = await fetch(GOOGLE_TTS_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": GOOGLE_TTS_API_KEY,
+        },
         body: JSON.stringify({
           input: { text },
           voice: {
@@ -90,16 +107,16 @@ export async function POST(request: NextRequest) {
             effectsProfileId: ["headphone-class-device"],
           },
         }),
-      }
-    );
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      // Don't leak Google's detailed error messages to the client
       return NextResponse.json(
-        {
-          error:
-            errorData.error?.message || "Failed to generate audio",
-        },
+        { error: "Failed to generate audio" },
         { status: response.status }
       );
     }
@@ -113,11 +130,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return as data URL so client can play it directly
-    // For production, consider uploading to a CDN and returning the URL
     return NextResponse.json({
       success: true,
-      audioContent: data.audioContent, // base64 MP3
+      audioContent: data.audioContent,
       voice: selectedVoice.name,
     });
   } catch {
