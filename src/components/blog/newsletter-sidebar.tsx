@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Divider } from "@/components/ui/divider";
+import { Button } from "@/components/ui/button";
 
 export function NewsletterSidebar() {
   const [email, setEmail] = useState("");
@@ -147,20 +148,15 @@ export function NewsletterSidebar() {
             </div>
 
             {/* Subscribe button */}
-            <button
+            <Button
               type="submit"
-              disabled={status === "loading"}
-              className="w-full py-4 rounded-full bg-amber text-text-primary text-[16px] font-medium leading-[24px] text-center hover:bg-amber-dark transition-colors disabled:opacity-70 font-inter"
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={status === "loading"}
             >
-              {status === "loading" ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-text-primary/30 border-t-text-primary rounded-full animate-spin" />
-                  Subscribing...
-                </span>
-              ) : (
-                "Subscribe"
-              )}
-            </button>
+              Subscribe
+            </Button>
           </form>
         )}
       </div>

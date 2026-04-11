@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { X, Check, Copy } from "lucide-react";
 import { QuizModalShell } from "./quiz-modal-shell";
+import { Button } from "@/components/ui/button";
 
 interface QuizShareModalProps {
   isOpen: boolean;
@@ -190,27 +191,21 @@ export function QuizShareModal({
         </div>
 
         {/* Copy link */}
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="md"
+          fullWidth
           onClick={copyLink}
-          className="w-full flex items-center gap-3 px-4 h-11 rounded-full border border-border bg-bg-card hover:bg-bg-subtle hover:border-amber transition-colors group"
+          leadingIcon={
+            copied ? (
+              <Check size={14} strokeWidth={3} />
+            ) : (
+              <Copy size={14} />
+            )
+          }
         >
-          <span
-            className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
-              copied
-                ? "bg-success text-white"
-                : "bg-bg-subtle text-text-secondary group-hover:bg-amber group-hover:text-white"
-            }`}
-            aria-hidden="true"
-          >
-            {copied ? <Check size={12} strokeWidth={3} /> : <Copy size={12} />}
-          </span>
-          <span className="flex-1 min-w-0 text-left">
-            <span className="block text-[12px] font-semibold text-text-primary font-inter truncate">
-              {copied ? "Link copied" : "Copy share link"}
-            </span>
-          </span>
-        </button>
+          {copied ? "Link copied" : "Copy share link"}
+        </Button>
       </div>
     </QuizModalShell>
   );

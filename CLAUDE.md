@@ -54,6 +54,63 @@ When designing UI, **do not** use the lazy decorative tropes that scream "AI gen
 - Use **rounded-full pills** for interactive chips and **`rounded-[14px]`** (the `--radius-lg` token) for cards. Don't invent new radii.
 - When in doubt, **remove an effect** instead of adding one.
 
+## Buttons — single source of truth
+
+**Always use `<Button>` from `@/components/ui/button` for any clickable action.** Inline button classNames are not allowed. Use `buttonClasses({ variant, size })` only when you need to apply button styling to a `<Link>` or `<a>` (typically for navigation).
+
+### Variants
+
+| variant | Background | Use it for |
+|---|---|---|
+| **primary** | `bg-text-primary text-bg` (auto-inverts per theme: dark on light themes, light on dark themes) | The single most important action on a screen — Subscribe, Start the quiz, Next, See results, Get in touch, Try again (only when paired alone), Play. |
+| **secondary** | `bg-bg-card` + `border-border` + `text-text-primary` | The "other choice" beside a primary — Try again, Cancel, Back home. |
+| **ghost** | transparent, `text-text-secondary`, hover `bg-bg-subtle` | Low-emphasis nav inside a flow — Back, Previous, Skip. |
+| **icon** | Like secondary but square/circle | Icon-only buttons — close X, FAB, sticky controls. |
+
+### Sizes
+
+| size | height | padding | text | use |
+|---|---|---|---|---|
+| `sm` | 36px | px-4 | 13px | Inside modals, dense toolbars. |
+| `md` (default) | 44px | px-5 | 14px | Page-level CTAs (the standard). |
+| `lg` | 52px | px-7 | 15px | Hero CTAs, full-width forms (Subscribe). |
+| `icon-sm` / `icon-md` / `icon-lg` | 36 / 44 / 52 square | — | — | Icon-only. |
+
+All button shapes are **`rounded-full`**. Don't introduce `rounded-xl` or `rounded-lg` button shapes — they don't exist in the system anymore.
+
+### Theme adaptation
+The primary variant uses `bg-text-primary text-bg`, which means it automatically inverts:
+- **Light theme** → near-black button on cream background
+- **Sepia theme** → dark brown button on warm cream
+- **Dark theme** → near-white button on near-black background
+- **Night theme** → near-white button on pure black
+
+Never hardcode `#FFFFFF` / `#000000` / `#2D2D2D` for button colors — let the tokens flip.
+
+### Loading state
+Pass `loading={isPending}` and the Button renders a spinner + sets `aria-busy`. Don't build your own spinner inside a button.
+
+### Disabled state
+Pass `disabled` and the Button applies `opacity-40 cursor-not-allowed pointer-events-none`. Single rule everywhere.
+
+### What's NOT a Button
+These look like buttons but they're a different pattern — leave them alone:
+- **Toggleable chips** (theme tags, font tags, language filter, quiz options, Listen toggle on the blog header). They use a border + amber active state. Selection ≠ action.
+- **Navbar links** — they're text links with active-state highlighting, not actions.
+- **Sliders** (text size, line spacing) — interactive control, not a button.
+
+### Where amber stays (intentional)
+Amber is the **selection / state** color, not the action color:
+- Selected state on theme/font/language/quiz tags
+- Active nav link in the navbar
+- Audio progress bar fill + dot
+- Reading progress strip at the top
+- Section-label decorative dashes
+- Logo brand dot
+- Focus-visible outline
+
+If you find yourself reaching for `bg-amber` on a button, stop and use `<Button variant="primary">` instead.
+
 ## Commands
 - `npm run dev` — Start dev server
 - `npm run build` — Production build

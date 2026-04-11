@@ -162,24 +162,24 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           <div className="flex items-center gap-2 flex-wrap">
             {post.hasAudio && (
               <button
+                type="button"
                 onClick={() => setAudioOpen(!audioOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[12px] font-medium transition-all font-inter ${
+                aria-pressed={audioOpen}
+                aria-label="Toggle audio player"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] font-medium font-inter transition-colors ${
                   audioOpen
                     ? "border-amber bg-highlight-bg text-amber"
                     : "border-border text-text-secondary hover:border-amber hover:text-amber"
                 }`}
-                aria-label="Toggle audio player"
               >
                 <Headphones size={14} />
                 Listen
               </button>
             )}
             <button
+              type="button"
               onClick={() => setSubscribeOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber text-white text-[12px] font-semibold transition-all font-inter hover:bg-amber-dark"
-              style={{
-                boxShadow: "0 4px 12px rgba(232,168,50,0.25)",
-              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-text-primary text-bg text-[12px] font-semibold font-inter hover:opacity-90 transition-opacity"
               aria-label="Subscribe to newsletter"
             >
               <Mail size={14} />

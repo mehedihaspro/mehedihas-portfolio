@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { QuizQuestion, QuizAnswer } from "./types";
 import { QuizModalShell } from "./quiz-modal-shell";
+import { Button } from "@/components/ui/button";
 
 interface QuizResultsProps {
   questions: QuizQuestion[];
@@ -182,22 +183,24 @@ export function QuizResults({
 
       {/* ============ ACTIONS ============ */}
       <div className="px-6 md:px-8 mt-5 flex flex-col sm:flex-row gap-2.5">
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
+          fullWidth
           onClick={() => onShare(correctCount, total)}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-amber hover:bg-amber-dark text-white font-semibold text-[13px] font-inter transition-colors"
+          leadingIcon={<Share2 size={14} />}
         >
-          <Share2 size={14} />
           Share your score
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          fullWidth
           onClick={onRetake}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-border bg-bg-card hover:bg-bg-subtle text-text-primary font-semibold text-[13px] font-inter transition-colors"
+          leadingIcon={<RotateCcw size={14} />}
         >
-          <RotateCcw size={14} />
           Try again
-        </button>
+        </Button>
       </div>
 
       {/* ============ REVIEW ============ */}

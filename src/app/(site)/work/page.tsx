@@ -3,6 +3,7 @@ import Link from "next/link";
 import { sanityClient } from "@/lib/sanity/client";
 import { allProjectsQuery } from "@/lib/sanity/queries";
 import { PageHeader } from "@/components/layout/page-header";
+import { buttonClasses } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -142,7 +143,7 @@ export default async function WorkPage() {
         <p className="text-text-secondary mb-4">Interested in working together?</p>
         <a
           href="mailto:hellomehedihas@gmail.com"
-          className="h-10 px-6 inline-flex items-center justify-center rounded-xl bg-amber text-white text-sm font-semibold hover:bg-amber-dark transition-colors"
+          className={buttonClasses({ variant: "primary", size: "md" })}
         >
           Get in touch
         </a>

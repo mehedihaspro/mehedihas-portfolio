@@ -1,6 +1,7 @@
 "use client";
 
 import { Brain, Clock, HelpCircle, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface QuizStartCardProps {
   title: string;
@@ -73,14 +74,14 @@ export function QuizStartCard({
 
         {/* CTA */}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="md"
             onClick={onStart}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-amber text-white text-[14px] font-semibold font-inter hover:bg-amber-dark transition-colors"
+            trailingIcon={<ArrowRight size={14} strokeWidth={2.5} />}
           >
-            <span>Start the quiz</span>
-            <ArrowRight size={14} strokeWidth={2.5} />
-          </button>
+            Start the quiz
+          </Button>
           <span className="text-[11px] text-text-muted font-inter">
             Opens in a focused window · Esc to close
           </span>

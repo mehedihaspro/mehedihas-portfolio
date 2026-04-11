@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import type { QuizQuestion, QuizAnswer } from "./types";
 import { QuizModalShell } from "./quiz-modal-shell";
+import { Button } from "@/components/ui/button";
 
 interface QuizRunnerProps {
   questions: QuizQuestion[];
@@ -215,25 +216,25 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
 
       {/* ============ FOOTER ============ */}
       <div className="px-6 md:px-8 py-5 mt-4 flex items-center justify-between gap-3">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={handlePrev}
           disabled={currentIdx === 0}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-[13px] font-medium text-text-secondary hover:text-text-primary hover:bg-bg-subtle transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-text-secondary font-inter"
+          leadingIcon={<ArrowLeft size={14} />}
         >
-          <ArrowLeft size={14} />
           Back
-        </button>
+        </Button>
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={handleNext}
           disabled={currentAnswer === null}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-text-primary text-bg text-[13px] font-semibold font-inter hover:opacity-90 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
+          trailingIcon={<ArrowRight size={14} />}
         >
           {isLast ? "See results" : "Next"}
-          <ArrowRight size={14} />
-        </button>
+        </Button>
       </div>
 
       {/* Keyboard hints */}

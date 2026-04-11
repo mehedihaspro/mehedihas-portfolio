@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { Button, buttonClasses } from "@/components/ui/button";
 
 export default function Error({
   error,
@@ -28,17 +29,10 @@ export default function Error({
           Try reloading the page. If the problem persists, head back home.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={reset}
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl bg-text-primary text-bg text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
+          <Button variant="primary" size="md" onClick={reset}>
             Try again
-          </button>
-          <Link
-            href="/"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl border border-border text-text-secondary text-sm font-medium hover:bg-bg-subtle hover:text-text-primary transition-colors"
-          >
+          </Button>
+          <Link href="/" className={buttonClasses({ variant: "secondary", size: "md" })}>
             Back home
           </Link>
         </div>

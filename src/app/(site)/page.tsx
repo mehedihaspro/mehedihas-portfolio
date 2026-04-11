@@ -3,6 +3,7 @@ import { AudioLines, ArrowRight } from "lucide-react";
 import { sanityClient } from "@/lib/sanity/client";
 import { featuredPostsQuery, allProjectsQuery, authorQuery } from "@/lib/sanity/queries";
 import { NewsletterSidebar } from "@/components/blog/newsletter-sidebar";
+import { buttonClasses } from "@/components/ui/button";
 
 export const revalidate = 60;
 
@@ -68,16 +69,10 @@ export default async function HomePage() {
           </p>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/work"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl bg-text-primary text-bg text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
+            <Link href="/work" className={buttonClasses({ variant: "primary", size: "md" })}>
               View my work
             </Link>
-            <Link
-              href="/blog"
-              className="h-10 px-5 inline-flex items-center justify-center rounded-xl border border-border text-text-secondary text-sm font-medium hover:bg-bg-subtle hover:text-text-primary transition-colors"
-            >
+            <Link href="/blog" className={buttonClasses({ variant: "secondary", size: "md" })}>
               Read the blog
             </Link>
           </div>

@@ -176,48 +176,28 @@ export function AudioPlayer({
     <>
       {/* ========== MAIN PLAYER (pill shape, single row) ========== */}
       <div ref={mainPlayerRef} className="w-full max-w-[820px] mx-auto">
-        <div
-          className="relative rounded-full bg-bg-card overflow-hidden"
-          style={{
-            boxShadow:
-              "0 2px 8px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.05)",
-          }}
-        >
-          {/* Ambient glow behind play button */}
-          <div
-            className="absolute -top-12 -left-12 w-48 h-48 rounded-full blur-3xl opacity-10 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle, var(--amber) 0%, transparent 70%)",
-            }}
-            aria-hidden="true"
-          />
-
+        <div className="relative rounded-full bg-bg-card border border-border overflow-hidden">
           <div className="relative flex items-center gap-4 p-4 md:p-5">
             {/* Play button */}
             <button
               type="button"
               onClick={handlePlay}
               disabled={loading}
-              className="group relative w-[52px] h-[52px] shrink-0 rounded-full bg-amber text-white flex items-center justify-center hover:bg-amber-dark hover:scale-105 transition-all disabled:opacity-70 disabled:hover:scale-100"
+              className="group relative w-[52px] h-[52px] shrink-0 rounded-full bg-text-primary text-bg flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label={isPlaying ? "Pause" : "Play"}
-              style={{
-                boxShadow:
-                  "0 6px 20px rgba(232,168,50,0.35), 0 2px 6px rgba(232,168,50,0.2)",
-              }}
+              aria-busy={loading || undefined}
             >
-              {isPlaying && !loading && (
-                <span
-                  className="absolute inset-0 rounded-full bg-amber animate-ping opacity-25"
+              {loading ? (
+                <Loader2 size={19} className="animate-spin" aria-hidden="true" />
+              ) : isPlaying ? (
+                <Pause size={18} fill="currentColor" aria-hidden="true" />
+              ) : (
+                <Play
+                  size={18}
+                  fill="currentColor"
+                  className="ml-0.5"
                   aria-hidden="true"
                 />
-              )}
-              {loading ? (
-                <Loader2 size={19} className="animate-spin" />
-              ) : isPlaying ? (
-                <Pause size={18} fill="currentColor" />
-              ) : (
-                <Play size={18} fill="currentColor" className="ml-0.5" />
               )}
             </button>
 
@@ -313,16 +293,21 @@ export function AudioPlayer({
               type="button"
               onClick={handlePlay}
               disabled={loading}
-              className="w-10 h-10 shrink-0 rounded-full bg-amber text-white flex items-center justify-center hover:bg-amber-dark transition-colors disabled:opacity-70"
+              className="w-10 h-10 shrink-0 rounded-full bg-text-primary text-bg flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
               aria-label={isPlaying ? "Pause" : "Play"}
-              style={{ boxShadow: "0 4px 12px rgba(232,168,50,0.35)" }}
+              aria-busy={loading || undefined}
             >
               {loading ? (
-                <Loader2 size={15} className="animate-spin" />
+                <Loader2 size={15} className="animate-spin" aria-hidden="true" />
               ) : isPlaying ? (
-                <Pause size={14} fill="currentColor" />
+                <Pause size={14} fill="currentColor" aria-hidden="true" />
               ) : (
-                <Play size={14} fill="currentColor" className="ml-0.5" />
+                <Play
+                  size={14}
+                  fill="currentColor"
+                  className="ml-0.5"
+                  aria-hidden="true"
+                />
               )}
             </button>
 

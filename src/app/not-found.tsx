@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buttonClasses } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -21,16 +22,10 @@ export default function NotFound() {
           you back on track.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <Link
-            href="/"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl bg-text-primary text-bg text-sm font-semibold hover:opacity-90 transition-opacity"
-          >
+          <Link href="/" className={buttonClasses({ variant: "primary", size: "md" })}>
             Back home
           </Link>
-          <Link
-            href="/blog"
-            className="h-10 px-5 inline-flex items-center justify-center rounded-xl border border-border text-text-secondary text-sm font-medium hover:bg-bg-subtle hover:text-text-primary transition-colors"
-          >
+          <Link href="/blog" className={buttonClasses({ variant: "secondary", size: "md" })}>
             Read the blog
           </Link>
         </div>
