@@ -63,8 +63,9 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
     <div className="mx-auto max-w-[1440px] px-4 md:px-8 lg:px-20 pb-12">
       <PageHeader title="Writing &Thinking" breadcrumbLabel="Blog" />
 
-      {/* Filters section */}
-      <section className="px-4 md:px-6 mb-8">
+      {/* Filters section — sits tight under the page header, but has
+          real breathing room BEFORE the blog list below (per proximity) */}
+      <section className="px-4 md:px-6 mb-12 md:mb-16">
         {/* Language + Category filter */}
         <LanguageFilter
           categories={categories}

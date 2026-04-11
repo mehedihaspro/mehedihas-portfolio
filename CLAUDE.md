@@ -111,6 +111,15 @@ Amber is the **selection / state** color, not the action color:
 
 If you find yourself reaching for `bg-amber` on a button, stop and use `<Button variant="primary">` instead.
 
+## Page production status
+Track which pages are "done" and which still have open work. When a
+page is marked ✅ production-ready, treat it as locked — any future
+change there should be an intentional decision, not drive-by tweaks.
+
+| Page | Status | Notes |
+|---|---|---|
+| `/blog/[slug]` — Blog detail | ✅ Production-ready (2026-04-11) | Category pill, cover hero, author avatar from Sanity, audio player, TOC, reading settings, quiz modal, share dropdown, selection popover, related posts. **Revisit if:** author schema adds more fields, quiz flow changes, or new content blocks are added to the post schema. |
+
 ## Commands
 - `npm run dev` — Start dev server
 - `npm run build` — Production build
