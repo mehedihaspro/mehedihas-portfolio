@@ -6,6 +6,7 @@ import {
   User,
   Info,
   GraduationCap,
+  Tags,
 } from "lucide-react";
 import type { ComponentType } from "react";
 
@@ -38,6 +39,14 @@ export const deskStructure: StructureResolver = (S) =>
           S.documentTypeList("post")
             .title("Blog Posts")
             .defaultOrdering([{ field: "publishedAt", direction: "desc" }])
+        ),
+      S.listItem()
+        .title("Categories")
+        .icon(icon(Tags))
+        .child(
+          S.documentTypeList("category")
+            .title("Categories")
+            .defaultOrdering([{ field: "title", direction: "asc" }])
         ),
       S.listItem()
         .title("Case Studies")

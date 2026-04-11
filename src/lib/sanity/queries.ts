@@ -20,13 +20,19 @@ const imageFragment = groq`{
 // Blog Post Queries
 // ============================================
 
+// Category is a reference — dereference into { title, slug }
+const categoryFragment = groq`{
+  "title": coalesce(title, "Uncategorized"),
+  "slug": slug.current
+}`;
+
 export const allPostsQuery = groq`
   *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id,
     title,
     slug,
     excerpt,
-    category,
+    "category": category->${categoryFragment},
     tags,
     language,
     "coverImage": coverImage${imageFragment},
@@ -45,7 +51,7 @@ export const featuredPostsQuery = groq`
     title,
     slug,
     excerpt,
-    category,
+    "category": category->${categoryFragment},
     "coverImage": coverImage${imageFragment},
     coverColor,
     readingTime,
@@ -60,7 +66,7 @@ export const postBySlugQuery = groq`
     slug,
     excerpt,
     summary,
-    category,
+    "category": category->${categoryFragment},
     tags,
     language,
     "coverImage": coverImage${imageFragment},
@@ -81,7 +87,7 @@ export const postBySlugQuery = groq`
       title,
       slug,
       excerpt,
-      category,
+      "category": category->${categoryFragment},
       publishedAt,
       readingTime,
       "coverImage": coverImage${imageFragment},
@@ -209,9 +215,23 @@ export const authorQuery = groq`
 `;
 
 // ============================================
-// Category list (derived from posts)
+// Category list (from the category document type)
 // ============================================
 
 export const categoriesQuery = groq`
-  array::unique(*[_type == "post" && !(_id in path("drafts.**"))].category)
+  *[_type == "category"] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description
+  }
+`;
+
+// Handy fallback: collect category titles from published posts only.
+// Useful for the blog list filter if you want to hide categories
+// that don't have any posts yet.
+export const activeCategoryTitlesQuery = groq`
+  array::unique(
+    *[_type == "post" && !(_id in path("drafts.**")) && defined(category->title)].category->title
+  )
 `;

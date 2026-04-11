@@ -30,13 +30,21 @@ export default async function HomePage() {
     ]);
 
     if (sanityPosts?.length) {
-      posts = sanityPosts.map((p: { slug: { current: string }; title: string; category: string; readingTime: string; enableAudio?: boolean }) => ({
-        slug: p.slug.current,
-        title: p.title,
-        category: p.category,
-        readingTime: p.readingTime || "5 min",
-        hasAudio: !!p.enableAudio,
-      }));
+      posts = sanityPosts.map(
+        (p: {
+          slug: { current: string };
+          title: string;
+          category?: { title?: string; slug?: string };
+          readingTime: string;
+          enableAudio?: boolean;
+        }) => ({
+          slug: p.slug.current,
+          title: p.title,
+          category: p.category?.title || "Uncategorized",
+          readingTime: p.readingTime || "5 min",
+          hasAudio: !!p.enableAudio,
+        })
+      );
     }
 
     if (sanityProjects?.length) {

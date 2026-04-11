@@ -304,19 +304,10 @@ export const post = defineType({
     defineField({
       name: "category",
       title: "Category",
-      type: "string",
-      options: {
-        list: [
-          { title: "UX Psychology", value: "UX Psychology" },
-          { title: "Design Psychology", value: "Design Psychology" },
-          { title: "Design System", value: "Design System" },
-          { title: "UX Design", value: "UX Design" },
-          { title: "Visual Design", value: "Visual Design" },
-          { title: "Career", value: "Career" },
-          { title: "Product Design", value: "Product Design" },
-          { title: "Content", value: "Content" },
-        ],
-      },
+      type: "reference",
+      to: [{ type: "category" }],
+      description:
+        "Pick an existing category or create a new one inline by clicking ‘Create new category’.",
       validation: (rule) => rule.required(),
       group: "meta",
     }),
@@ -662,7 +653,7 @@ export const post = defineType({
   preview: {
     select: {
       title: "title",
-      subtitle: "category",
+      subtitle: "category.title",
       media: "coverImage",
     },
   },

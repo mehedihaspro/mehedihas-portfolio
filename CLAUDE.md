@@ -115,3 +115,18 @@ If you find yourself reaching for `bg-amber` on a button, stop and use `<Button 
 - `npm run dev` — Start dev server
 - `npm run build` — Production build
 - `npm run lint` — ESLint check
+
+## One-off migrations
+Sanity schema migrations live in `scripts/`. Each script has a comment
+block at the top explaining prerequisites. Current scripts:
+
+- `scripts/migrate-categories.ts` — converts the legacy `post.category`
+  string field into references to the new `category` document type.
+  Run once after deploying the new schema:
+
+  ```bash
+  export SANITY_WRITE_TOKEN=sk...    # from manage.sanity.io → API → Tokens
+  npx tsx scripts/migrate-categories.ts
+  ```
+
+  Safe to re-run — it's idempotent.

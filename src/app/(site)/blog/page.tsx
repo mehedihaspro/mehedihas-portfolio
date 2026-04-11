@@ -36,7 +36,7 @@ export default async function BlogPage() {
           slug: { current: string };
           title: string;
           excerpt: string;
-          category: string;
+          category?: { title?: string; slug?: string };
           language?: string;
           publishedAt: string;
           readingTime: string;
@@ -47,7 +47,8 @@ export default async function BlogPage() {
           slug: post.slug.current,
           title: post.title,
           excerpt: post.excerpt || "",
-          category: post.category,
+          category: post.category?.title || "Uncategorized",
+          categorySlug: post.category?.slug || "",
           date: formatDate(post.publishedAt),
           readingTime: post.readingTime || "5 min read",
           hasAudio: !!post.enableAudio,
@@ -57,7 +58,9 @@ export default async function BlogPage() {
           language: post.language || "BANGLA",
         })
       );
-      categories = (sanityCategories || []).filter(Boolean);
+      categories = (sanityCategories || [])
+        .map((c: { title?: string }) => c.title)
+        .filter(Boolean);
     }
   } catch {
     // Sanity fetch failed

@@ -101,7 +101,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = {
     title: sanityPost.title,
     summary: sanityPost.summary || sanityPost.excerpt,
-    category: sanityPost.category || "Design",
+    category: sanityPost.category?.title || "Uncategorized",
+    categorySlug: sanityPost.category?.slug || "",
     date: formatDate(sanityPost.publishedAt),
     readingTime: sanityPost.readingTime || "5 min read",
     author: sanityAuthor?.name || "mehedihas",
@@ -119,7 +120,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     plainText,
     references: sanityPost.references || [],
     factChecks: sanityPost.factChecks || [],
-    relatedPosts: sanityPost.relatedPosts || [],
+    relatedPosts: (sanityPost.relatedPosts || []).map(
+      (r: {
+        _id?: string;
+        title?: string;
+        slug?: { current: string };
+        excerpt?: string;
+        category?: { title?: string; slug?: string };
+        publishedAt?: string;
+        readingTime?: string;
+        coverColor?: string;
+        coverImage?: { url?: string; alt?: string };
+        language?: string;
+        enableAudio?: boolean;
+      }) => ({
+        ...r,
+        category: r.category?.title || "Uncategorized",
+      })
+    ),
     quiz: sanityPost.quiz,
   };
 
