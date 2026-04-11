@@ -21,9 +21,13 @@ export function ReadingProgress() {
   }, []);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[1001] h-[3px] bg-transparent pointer-events-none">
+    // z-[1001] keeps it above the navbar (z-[999]) but below modals (z-[1100])
+    <div
+      aria-hidden="true"
+      className="fixed top-0 left-0 right-0 z-[1001] h-[3px] bg-transparent pointer-events-none"
+    >
       <div
-        className="h-full bg-gradient-to-r from-amber to-amber-light transition-[width] duration-100 ease-linear"
+        className="h-full bg-amber transition-[width] duration-100 ease-linear"
         style={{ width: `${progress}%` }}
       />
     </div>

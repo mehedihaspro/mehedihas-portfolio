@@ -33,15 +33,9 @@ export function Toast({ message, show, onHide, type = "success" }: ToastProps) {
 
   return (
     <div
-      className={`fixed bottom-9 left-1/2 -translate-x-1/2 z-[1100] flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-[13px] font-medium text-white font-inter transition-all duration-300 ${
-        visible
-          ? "translate-y-0 opacity-100"
-          : "translate-y-20 opacity-0"
-      }`}
-      style={{
-        backgroundColor: type === "success" ? "#2D2D2D" : "#C0392B",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-      }}
+      className={`fixed bottom-9 left-1/2 -translate-x-1/2 z-[1200] flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium text-white font-inter transition-all duration-300 ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0"
+      } ${type === "success" ? "bg-text-primary" : "bg-error"}`}
       role="status"
     >
       {type === "success" ? (

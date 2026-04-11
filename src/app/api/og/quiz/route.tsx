@@ -3,12 +3,24 @@ import type { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
+// OG image must look identical across themes (it's a static image), so the
+// hex values here are intentional and pinned to the LIGHT theme tokens —
+// not a violation of the "no arbitrary hex" rule documented in CLAUDE.md.
+const COLORS = {
+  bg: "#FAF5EE",       // --bg
+  ink: "#2D2D2D",      // --text-primary
+  inkSoft: "#6B5D4F",  // --text-secondary
+  muted: "#8B7D6F",    // --text-muted
+  border: "#E8DFD0",   // --border
+  amber: "#E8A832",    // --amber
+} as const;
+
 const TIERS = [
-  { min: 100, emoji: "🎯", title: "Perfect", color: "#2E7D32" },
-  { min: 80, emoji: "⭐", title: "Impressive", color: "#C48A1A" },
-  { min: 60, emoji: "📖", title: "Solid", color: "#8B6B4A" },
-  { min: 40, emoji: "🤔", title: "Getting there", color: "#C48A1A" },
-  { min: 0, emoji: "💭", title: "Honest start", color: "#6B5D4F" },
+  { min: 100, title: "Perfect score" },
+  { min: 80, title: "Impressive" },
+  { min: 60, title: "Solid" },
+  { min: 40, title: "Getting there" },
+  { min: 0, title: "Honest start" },
 ];
 
 export async function GET(request: NextRequest) {
@@ -37,9 +49,7 @@ export async function GET(request: NextRequest) {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            backgroundColor: "#FAF5EE",
-            backgroundImage:
-              "radial-gradient(circle at 85% 15%, rgba(232,168,50,0.25) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(232,168,50,0.15) 0%, transparent 45%)",
+            backgroundColor: COLORS.bg,
             padding: 80,
             position: "relative",
             fontFamily: "sans-serif",
@@ -60,40 +70,30 @@ export async function GET(request: NextRequest) {
                 fillRule="evenodd"
                 clipRule="evenodd"
                 d="M36.5625 21.9363C37.9275 21.3226 39.4397 20.9811 41.0312 20.9811C47.0891 20.9811 52 25.9241 52 32.0216V47.9689H45.5V32.0216C45.5 29.5374 43.4993 27.5236 41.0312 27.5236C38.5632 27.5236 36.5625 29.5374 36.5625 32.0216V48L15.4375 38.5497V14.8476H6.5V38.564H0V8.30508H17.9972L36.5625 0V21.9363ZM21.9375 13.7023V34.2969L30.0625 37.9323V10.0677L21.9375 13.7023Z"
-                fill="#36322D"
+                fill={COLORS.ink}
               />
-              <circle cx="55.3332" cy="24.3226" r="3.33333" fill="#FF8000" />
+              <circle cx="55.3332" cy="24.3226" r="3.33333" fill={COLORS.amber} />
             </svg>
 
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 12,
-                backgroundColor: "rgba(255,255,255,0.8)",
                 padding: "10px 20px",
                 borderRadius: 999,
-                border: "1px solid rgba(232, 168, 50, 0.3)",
+                border: `1px solid ${COLORS.border}`,
               }}
             >
-              <div
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  backgroundColor: tier.color,
-                }}
-              />
               <span
                 style={{
                   fontSize: 18,
                   fontWeight: 700,
-                  color: "#6B5D4F",
-                  letterSpacing: "0.1em",
+                  color: COLORS.muted,
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
                 }}
               >
-                Quiz Score
+                Quiz score
               </span>
             </div>
           </div>
@@ -105,12 +105,12 @@ export async function GET(request: NextRequest) {
               fontWeight: 700,
               letterSpacing: "0.2em",
               textTransform: "uppercase",
-              color: tier.color,
+              color: COLORS.amber,
               marginBottom: 16,
               display: "flex",
             }}
           >
-            {tier.emoji} {tier.title}
+            {tier.title}
           </div>
 
           {/* Big score */}
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
                 fontSize: 280,
                 fontWeight: 900,
                 lineHeight: 0.85,
-                color: "#36322D",
+                color: COLORS.ink,
                 letterSpacing: "-0.06em",
               }}
             >
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
                 fontSize: 120,
                 fontWeight: 900,
                 lineHeight: 0.85,
-                color: "#8B7D6F",
+                color: COLORS.muted,
                 marginLeft: 8,
               }}
             >
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: 48,
                 fontWeight: 800,
-                color: "#C48A1A",
+                color: COLORS.amber,
                 marginLeft: "auto",
               }}
             >
@@ -161,12 +161,12 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: 28,
                 fontWeight: 600,
-                color: "#6B5D4F",
+                color: COLORS.inkSoft,
                 marginBottom: 12,
                 display: "flex",
               }}
             >
-              <span style={{ color: "#36322D", fontWeight: 800 }}>{name}</span>
+              <span style={{ color: COLORS.ink, fontWeight: 800 }}>{name}</span>
               <span style={{ marginLeft: 10 }}>aced it</span>
             </div>
           )}
@@ -175,7 +175,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: 26,
-              color: "#6B5D4F",
+              color: COLORS.inkSoft,
               lineHeight: 1.3,
               marginBottom: "auto",
               maxWidth: 900,
@@ -193,15 +193,15 @@ export async function GET(request: NextRequest) {
               justifyContent: "space-between",
               marginTop: 40,
               paddingTop: 30,
-              borderTop: "1px solid rgba(139, 125, 111, 0.2)",
+              borderTop: `1px solid ${COLORS.border}`,
             }}
           >
             <span
               style={{
                 fontSize: 20,
                 fontWeight: 700,
-                color: "#8B7D6F",
-                letterSpacing: "0.1em",
+                color: COLORS.muted,
+                letterSpacing: "0.12em",
                 textTransform: "uppercase",
               }}
             >
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
             <span
               style={{
                 fontSize: 20,
-                color: "#8B7D6F",
+                color: COLORS.muted,
                 fontStyle: "italic",
               }}
             >
