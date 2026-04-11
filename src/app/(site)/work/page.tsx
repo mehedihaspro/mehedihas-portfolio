@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { sanityClient } from "@/lib/sanity/client";
 import { allProjectsQuery } from "@/lib/sanity/queries";
+import type { SanityImage } from "@/lib/sanity/types";
 import { PageHeader } from "@/components/layout/page-header";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -22,6 +24,8 @@ export default async function WorkPage() {
     year: string;
     tags: string[];
     coverColor: string;
+    thumbnail: string;
+    thumbnailAlt: string;
   }> = [];
 
   try {
@@ -36,6 +40,7 @@ export default async function WorkPage() {
         year: string;
         tags: string[];
         coverColor: string;
+        thumbnail?: SanityImage;
       }) => ({
         slug: p.slug.current,
         title: p.title,
@@ -45,6 +50,8 @@ export default async function WorkPage() {
         year: p.year || "",
         tags: p.tags || [],
         coverColor: p.coverColor || "",
+        thumbnail: p.thumbnail?.url || "",
+        thumbnailAlt: p.thumbnail?.alt || p.title,
       }));
     }
   } catch {
@@ -86,16 +93,24 @@ export default async function WorkPage() {
                 }`}
               >
                 <div
-                  className={`aspect-[16/10] md:aspect-auto relative min-h-[280px] bg-bg-subtle ${
+                  className={`aspect-[16/10] md:aspect-auto relative min-h-[280px] bg-bg-subtle overflow-hidden ${
                     index % 2 === 1 ? "md:col-start-2" : ""
                   }`}
                   style={
-                    project.coverColor
+                    !project.thumbnail && project.coverColor
                       ? { backgroundColor: project.coverColor }
                       : undefined
                   }
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {project.thumbnail && (
+                    <Image
+                      src={project.thumbnail}
+                      alt={project.thumbnailAlt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                  )}
                 </div>
 
                 <div className="p-6 md:p-10 flex flex-col justify-center">

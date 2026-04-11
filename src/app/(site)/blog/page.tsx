@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { sanityClient } from "@/lib/sanity/client";
 import { allPostsQuery, categoriesQuery } from "@/lib/sanity/queries";
+import type { SanityImage } from "@/lib/sanity/types";
 import { BlogPageClient } from "./blog-page-client";
 import { PageHeader } from "@/components/layout/page-header";
 
@@ -39,8 +40,8 @@ export default async function BlogPage() {
           language?: string;
           publishedAt: string;
           readingTime: string;
-          audioUrl: string;
           enableAudio?: boolean;
+          coverImage?: SanityImage;
           coverColor: string;
         }) => ({
           slug: post.slug.current,
@@ -49,7 +50,9 @@ export default async function BlogPage() {
           category: post.category,
           date: formatDate(post.publishedAt),
           readingTime: post.readingTime || "5 min read",
-          hasAudio: !!post.enableAudio || !!post.audioUrl,
+          hasAudio: !!post.enableAudio,
+          coverImage: post.coverImage?.url || "",
+          coverImageAlt: post.coverImage?.alt || "",
           coverColor: post.coverColor || "",
           language: post.language || "BANGLA",
         })

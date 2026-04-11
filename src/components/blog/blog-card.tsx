@@ -11,6 +11,7 @@ interface BlogCardProps {
   readingTime: string;
   hasAudio?: boolean;
   coverImage?: string;
+  coverImageAlt?: string;
 }
 
 export function BlogCard({
@@ -22,6 +23,7 @@ export function BlogCard({
   readingTime,
   hasAudio = false,
   coverImage,
+  coverImageAlt,
 }: BlogCardProps) {
   return (
     <Link href={`/blog/${slug}`} className="group block">
@@ -43,7 +45,7 @@ export function BlogCard({
           {coverImage ? (
             <Image
               src={coverImage}
-              alt={title}
+              alt={coverImageAlt || title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 768px) 100vw, (max-width: 1024px) 240px, 308px"

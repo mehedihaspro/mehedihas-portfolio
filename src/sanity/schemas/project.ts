@@ -108,12 +108,19 @@ export const project = defineType({
           type: "image",
           options: { hotspot: true },
           fields: [
-            defineField({ name: "alt", title: "Alt Text", type: "string" }),
+            defineField({
+              name: "alt",
+              title: "Alt Text",
+              type: "string",
+              validation: (rule) =>
+                rule.required().error("Alt text is required"),
+            }),
             defineField({ name: "caption", title: "Caption", type: "string" }),
           ],
         },
       ],
-      description: "Current state screens, research artifacts, user journey maps, whiteboard photos",
+      description:
+        "Current state screens, research artifacts, user journey maps, whiteboard photos. Landscape 16:10 preferred.",
       group: "problem",
     }),
     defineField({
@@ -145,12 +152,19 @@ export const project = defineType({
           type: "image",
           options: { hotspot: true },
           fields: [
-            defineField({ name: "alt", title: "Alt Text", type: "string" }),
+            defineField({
+              name: "alt",
+              title: "Alt Text",
+              type: "string",
+              validation: (rule) =>
+                rule.required().error("Alt text is required"),
+            }),
             defineField({ name: "caption", title: "Caption", type: "string" }),
           ],
         },
       ],
-      description: "Final screens, prototypes, key flows, before/after comparisons",
+      description:
+        "Final screens, prototypes, key flows, before/after comparisons. Landscape 16:10 preferred.",
       group: "solution",
     }),
     defineField({
@@ -252,9 +266,16 @@ export const project = defineType({
       title: "Thumbnail / Cover Image",
       type: "image",
       options: { hotspot: true },
-      description: "The visual anchor. First thing a recruiter sees.",
+      description:
+        "The visual anchor. First thing a recruiter sees. Landscape 16:10 recommended, target 1600×1000.",
       fields: [
-        defineField({ name: "alt", title: "Alt Text", type: "string" }),
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
+          validation: (rule) =>
+            rule.required().error("Alt text is required"),
+        }),
       ],
       group: "media",
     }),

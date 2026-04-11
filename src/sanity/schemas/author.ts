@@ -19,9 +19,21 @@ export const author = defineType({
     }),
     defineField({
       name: "avatar",
-      title: "Avatar",
+      title: "Avatar / Profile Photo",
       type: "image",
       options: { hotspot: true },
+      description:
+        "Square photo, 1:1 aspect ratio. Target 400×400 or larger. Shown as a circle in the blog byline and the About page hero.",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
+          description: "e.g. 'Mehedi Hasan portrait'",
+          validation: (rule) =>
+            rule.required().error("Alt text is required"),
+        }),
+      ],
     }),
     defineField({
       name: "socialLinks",

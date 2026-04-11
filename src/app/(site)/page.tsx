@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { AudioLines, ArrowRight } from "lucide-react";
 import { sanityClient } from "@/lib/sanity/client";
 import { featuredPostsQuery, allProjectsQuery, authorQuery } from "@/lib/sanity/queries";
+import type { SanityImage } from "@/lib/sanity/types";
 import { NewsletterSidebar } from "@/components/blog/newsletter-sidebar";
 import { buttonClasses } from "@/components/ui/button";
 
@@ -9,7 +11,15 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   let posts: Array<{ slug: string; title: string; category: string; readingTime: string; hasAudio: boolean }> = [];
-  let projects: Array<{ slug: string; title: string; description: string; role: string; coverColor: string }> = [];
+  let projects: Array<{
+    slug: string;
+    title: string;
+    description: string;
+    role: string;
+    coverColor: string;
+    thumbnail: string;
+    thumbnailAlt: string;
+  }> = [];
   let author: { currentlyReading?: string; currentlyDesigning?: string; currentlyLearning?: string } | null = null;
 
   try {
@@ -20,23 +30,34 @@ export default async function HomePage() {
     ]);
 
     if (sanityPosts?.length) {
-      posts = sanityPosts.map((p: { slug: { current: string }; title: string; category: string; readingTime: string; audioUrl: string }) => ({
+      posts = sanityPosts.map((p: { slug: { current: string }; title: string; category: string; readingTime: string; enableAudio?: boolean }) => ({
         slug: p.slug.current,
         title: p.title,
         category: p.category,
         readingTime: p.readingTime || "5 min",
-        hasAudio: !!p.audioUrl,
+        hasAudio: !!p.enableAudio,
       }));
     }
 
     if (sanityProjects?.length) {
-      projects = sanityProjects.slice(0, 2).map((p: { slug: { current: string }; title: string; overview: string; role: string; coverColor: string }) => ({
-        slug: p.slug.current,
-        title: p.title,
-        description: p.overview || "",
-        role: p.role || "Designer",
-        coverColor: p.coverColor || "",
-      }));
+      projects = sanityProjects.slice(0, 2).map(
+        (p: {
+          slug: { current: string };
+          title: string;
+          overview: string;
+          role: string;
+          coverColor: string;
+          thumbnail?: SanityImage;
+        }) => ({
+          slug: p.slug.current,
+          title: p.title,
+          description: p.overview || "",
+          role: p.role || "Designer",
+          coverColor: p.coverColor || "",
+          thumbnail: p.thumbnail?.url || "",
+          thumbnailAlt: p.thumbnail?.alt || p.title,
+        })
+      );
     }
 
     if (sanityAuthor) author = sanityAuthor;
@@ -114,21 +135,29 @@ export default async function HomePage() {
           <div className="grid md:grid-cols-2 gap-6">
             {projects.map((project) => (
               <Link key={project.slug} href={`/work/${project.slug}`} className="group block">
-                <div className="rounded-2xl overflow-hidden bg-bg-card border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                <div className="rounded-2xl overflow-hidden bg-bg-card border border-border hover:-translate-y-0.5 transition-all duration-300">
                   <div
-                    className="aspect-[16/10] relative bg-bg-subtle"
+                    className="aspect-[16/10] relative bg-bg-subtle overflow-hidden"
                     style={
-                      project.coverColor
+                      !project.thumbnail && project.coverColor
                         ? { backgroundColor: project.coverColor }
                         : undefined
                     }
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    {project.thumbnail && (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.thumbnailAlt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      />
+                    )}
                   </div>
                   <div className="p-5 md:p-6">
                     <p className="text-[11px] font-semibold text-amber uppercase tracking-wider mb-2">{project.role}</p>
                     <h3 className="text-xl font-bold text-text-primary mb-1 group-hover:text-amber transition-colors">{project.title}</h3>
-                    <p className="text-sm text-text-secondary">{project.description}</p>
+                    <p className="text-sm text-text-secondary line-clamp-2">{project.description}</p>
                   </div>
                 </div>
               </Link>

@@ -1,21 +1,38 @@
 import { groq } from "next-sanity";
 
 // ============================================
+// Reusable fragments
+// ============================================
+
+// Expand a Sanity image field into the asset URL + metadata. Returns the
+// URL as the `url` property so the front-end can consume it directly.
+const imageFragment = groq`{
+  "url": asset->url,
+  "lqip": asset->metadata.lqip,
+  "width": asset->metadata.dimensions.width,
+  "height": asset->metadata.dimensions.height,
+  "aspectRatio": asset->metadata.dimensions.aspectRatio,
+  alt,
+  caption
+}`;
+
+// ============================================
 // Blog Post Queries
 // ============================================
 
 export const allPostsQuery = groq`
-  *[_type == "post"] | order(publishedAt desc) {
+  *[_type == "post" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id,
     title,
     slug,
     excerpt,
     category,
     tags,
-    coverImage,
+    language,
+    "coverImage": coverImage${imageFragment},
     coverColor,
     readingTime,
-    audioUrl,
+    enableAudio,
     audioDuration,
     publishedAt,
     featured
@@ -23,13 +40,13 @@ export const allPostsQuery = groq`
 `;
 
 export const featuredPostsQuery = groq`
-  *[_type == "post" && featured == true] | order(publishedAt desc) [0...3] {
+  *[_type == "post" && featured == true && !(_id in path("drafts.**"))] | order(publishedAt desc) [0...3] {
     _id,
     title,
     slug,
     excerpt,
     category,
-    coverImage,
+    "coverImage": coverImage${imageFragment},
     coverColor,
     readingTime,
     publishedAt
@@ -46,7 +63,7 @@ export const postBySlugQuery = groq`
     category,
     tags,
     language,
-    coverImage,
+    "coverImage": coverImage${imageFragment},
     coverColor,
     body,
     readingTime,
@@ -67,6 +84,7 @@ export const postBySlugQuery = groq`
       category,
       publishedAt,
       readingTime,
+      "coverImage": coverImage${imageFragment},
       coverColor,
       language,
       enableAudio
@@ -75,7 +93,7 @@ export const postBySlugQuery = groq`
 `;
 
 export const postSlugsQuery = groq`
-  *[_type == "post"] { "slug": slug.current }
+  *[_type == "post" && !(_id in path("drafts.**"))] { "slug": slug.current }
 `;
 
 // ============================================
@@ -83,12 +101,12 @@ export const postSlugsQuery = groq`
 // ============================================
 
 export const allProjectsQuery = groq`
-  *[_type == "project"] | order(order asc) {
+  *[_type == "project" && !(_id in path("drafts.**"))] | order(order asc) {
     _id,
     title,
     slug,
     overview,
-    thumbnail,
+    "thumbnail": thumbnail${imageFragment},
     coverColor,
     tags,
     client,
@@ -112,16 +130,16 @@ export const projectBySlugQuery = groq`
     year,
     client,
     liveUrl,
-    problemImages,
+    "problemImages": problemImages[]${imageFragment},
     research,
     planning,
-    solutionImages,
+    "solutionImages": solutionImages[]${imageFragment},
     solutions,
     challenges,
     detailedOutcome,
     learning,
     whatsNext,
-    thumbnail,
+    "thumbnail": thumbnail${imageFragment},
     coverColor
   }
 `;
@@ -131,12 +149,12 @@ export const projectBySlugQuery = groq`
 // ============================================
 
 export const allWorkshopsQuery = groq`
-  *[_type == "workshop"] | order(date desc) {
+  *[_type == "workshop" && !(_id in path("drafts.**"))] | order(date desc) {
     _id,
     title,
     slug,
     description,
-    coverImage,
+    "coverImage": coverImage${imageFragment},
     date,
     status,
     price,
@@ -146,7 +164,7 @@ export const allWorkshopsQuery = groq`
 `;
 
 export const upcomingWorkshopsQuery = groq`
-  *[_type == "workshop" && status == "upcoming"] | order(date asc) {
+  *[_type == "workshop" && status == "upcoming" && !(_id in path("drafts.**"))] | order(date asc) {
     _id,
     title,
     slug,
@@ -163,7 +181,7 @@ export const upcomingWorkshopsQuery = groq`
 // ============================================
 
 export const allNewsletterIssuesQuery = groq`
-  *[_type == "newsletterIssue"] | order(publishedAt desc) {
+  *[_type == "newsletterIssue" && !(_id in path("drafts.**"))] | order(publishedAt desc) {
     _id,
     title,
     slug,
@@ -182,7 +200,7 @@ export const authorQuery = groq`
     _id,
     name,
     bio,
-    avatar,
+    "avatar": avatar${imageFragment},
     socialLinks,
     currentlyReading,
     currentlyDesigning,
@@ -195,5 +213,5 @@ export const authorQuery = groq`
 // ============================================
 
 export const categoriesQuery = groq`
-  array::unique(*[_type == "post"].category)
+  array::unique(*[_type == "post" && !(_id in path("drafts.**"))].category)
 `;

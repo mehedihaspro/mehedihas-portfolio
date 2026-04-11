@@ -29,6 +29,22 @@ export const workshop = defineType({
       title: "Cover Image",
       type: "image",
       options: { hotspot: true },
+      description:
+        "Landscape 16:9 recommended. Target 1600×900 minimum.",
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
+          validation: (rule) =>
+            rule.required().error("Alt text is required"),
+        }),
+        defineField({
+          name: "caption",
+          title: "Caption (optional)",
+          type: "string",
+        }),
+      ],
     }),
     defineField({
       name: "date",

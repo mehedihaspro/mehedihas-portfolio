@@ -52,6 +52,7 @@ export const post = defineType({
       name: "body",
       title: "Body",
       type: "array",
+      validation: (rule) => rule.required().min(1),
       of: [
         {
           type: "block",
@@ -121,24 +122,31 @@ export const post = defineType({
         // Image block
         {
           type: "image",
+          title: "Inline Image",
           options: { hotspot: true },
+          description:
+            "Landscape orientation recommended. Target 1400×875 (16:10) or wider. Max display width ~1400px.",
           fields: [
             defineField({
               name: "alt",
               title: "Alt Text",
               type: "string",
-              validation: (rule) => rule.required(),
+              description:
+                "Describe the image for screen readers. Required for accessibility.",
+              validation: (rule) =>
+                rule.required().error("Alt text is required"),
             }),
             defineField({
               name: "caption",
               title: "Caption",
               type: "string",
+              description: "Optional caption shown below the image.",
             }),
             defineField({
               name: "fullWidth",
               title: "Full Width",
               type: "boolean",
-              description: "Break out of content width",
+              description: "Break out of the content column to full width.",
               initialValue: false,
             }),
           ],
@@ -338,8 +346,23 @@ export const post = defineType({
       title: "Cover Image",
       type: "image",
       options: { hotspot: true },
+      description:
+        "Landscape 16:9 recommended. Target 1600×900 minimum, up to 2400×1350. Shown as the article hero and on blog cards.",
       fields: [
-        defineField({ name: "alt", title: "Alt Text", type: "string" }),
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
+          description:
+            "Describe the image for screen readers. Required for accessibility.",
+          validation: (rule) =>
+            rule.required().error("Alt text is required"),
+        }),
+        defineField({
+          name: "caption",
+          title: "Caption (optional)",
+          type: "string",
+        }),
       ],
       group: "meta",
     }),
@@ -347,7 +370,8 @@ export const post = defineType({
       name: "coverColor",
       title: "Cover Color (fallback)",
       type: "string",
-      description: "Hex color for card cover if no image (e.g. #2D5F2D)",
+      description:
+        "Hex color for the blog-card background when no image is uploaded (e.g. #2D5F2D).",
       group: "meta",
     }),
     defineField({

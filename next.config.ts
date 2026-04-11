@@ -28,6 +28,17 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    // Sanity CDN serves all user-uploaded images. Without this, next/image
+    // refuses to load any asset from the CMS.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/images/**",
+      },
+    ],
+  },
   async headers() {
     return [
       {

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Headphones, Mail } from "lucide-react";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { TableOfContents } from "@/components/blog/table-of-contents";
@@ -60,9 +61,15 @@ interface Post {
   date: string;
   readingTime: string;
   author: string;
+  authorAvatar?: string;
   hasAudio: boolean;
   audioDuration?: string;
   language?: string;
+  coverImage?: string;
+  coverImageAlt?: string;
+  coverImageWidth?: number;
+  coverImageHeight?: number;
+  coverImageLqip?: string;
   tocItems: TocItem[];
   body: unknown[];
   plainText: string;
@@ -129,6 +136,15 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           />
         </div>
 
+        {/* Category pill */}
+        {post.category && (
+          <div className="mb-4">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-highlight-bg text-[11px] font-bold uppercase tracking-[0.12em] text-amber font-inter">
+              {post.category}
+            </span>
+          </div>
+        )}
+
         {/* Title */}
         <h1 className="text-[clamp(32px,5.5vw,50px)] font-bold text-text-primary leading-[1.25] tracking-[-0.5px] mb-6 font-inter">
           {post.title}
@@ -144,7 +160,22 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
         {/* Meta bar */}
         <div className="flex items-center justify-between gap-4 pb-8 mb-8 border-b border-border flex-wrap">
           <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-full bg-bg-subtle border border-border" />
+            {post.authorAvatar ? (
+              <div className="relative w-10 h-10 rounded-full overflow-hidden border border-border">
+                <Image
+                  src={post.authorAvatar}
+                  alt={post.author}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <div
+                className="w-10 h-10 rounded-full bg-bg-subtle border border-border"
+                aria-hidden="true"
+              />
+            )}
             <div className="flex flex-col">
               <span className="text-[15px] font-bold text-text-primary font-inter">
                 {post.author}
@@ -191,6 +222,24 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
             />
           </div>
         </div>
+
+        {/* Cover image hero */}
+        {post.coverImage && (
+          <figure className="mb-10 -mx-4 md:mx-0">
+            <div className="relative w-full rounded-none md:rounded-[14px] overflow-hidden bg-bg-subtle border border-border aspect-[16/9]">
+              <Image
+                src={post.coverImage}
+                alt={post.coverImageAlt || post.title}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 820px"
+                className="object-cover"
+                placeholder={post.coverImageLqip ? "blur" : "empty"}
+                blurDataURL={post.coverImageLqip || undefined}
+              />
+            </div>
+          </figure>
+        )}
 
         {/* Audio player (expandable, becomes sticky on scroll) */}
         {audioOpen && post.hasAudio && (

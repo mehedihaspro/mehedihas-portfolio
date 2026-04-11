@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Copy, Share2, Volume2, Loader2 } from "lucide-react";
 
 interface SelectionPopoverProps {
   onCopy: (text: string) => void;
@@ -97,7 +96,6 @@ export function SelectionPopover({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: selectedText,
-          voice: "female",
           language,
         }),
       });
@@ -145,74 +143,60 @@ export function SelectionPopover({
 
   return (
     <div
-      className="fixed z-[1002] animate-in fade-in zoom-in-95 duration-200"
+      className="fixed z-[1002] animate-in fade-in zoom-in-95 duration-150"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         transform: "translate(-50%, -100%)",
       }}
+      role="toolbar"
+      aria-label="Text actions"
     >
-      <div
-        className="flex items-stretch bg-[#1a1a1a] rounded-[14px] overflow-hidden border border-white/10"
-        style={{
-          boxShadow: "0 16px 40px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)",
-        }}
-      >
-        {/* Pronounce */}
+      {/* Theme-aware pill using design tokens. In light themes this is a
+          dark pill with light text; in dark themes it flips automatically. */}
+      <div className="flex items-stretch bg-text-primary text-bg rounded-full overflow-hidden">
         <button
+          type="button"
           onClick={handlePronounce}
           disabled={isPronouncing}
-          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter disabled:opacity-60"
+          aria-busy={isPronouncing || undefined}
+          className="px-4 h-10 text-[13px] font-semibold font-inter hover:opacity-80 transition-opacity disabled:opacity-60 disabled:cursor-wait"
         >
-          <div className="w-7 h-7 rounded-full bg-amber/20 flex items-center justify-center text-amber group-hover:bg-amber/30 transition-colors">
-            {isPronouncing ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              <Volume2 size={15} />
-            )}
-          </div>
-          <span className="text-[11px] font-medium tracking-tight">
-            Pronounce
-          </span>
+          {isPronouncing ? "Pronouncing…" : "Pronounce"}
         </button>
 
-        <div className="w-px bg-white/10" />
+        <span className="w-px bg-bg/20" aria-hidden="true" />
 
-        {/* Copy */}
         <button
+          type="button"
           onClick={() => {
             onCopy(selectedText);
             setPosition(null);
             window.getSelection()?.removeAllRanges();
           }}
-          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter"
+          className="px-4 h-10 text-[13px] font-semibold font-inter hover:opacity-80 transition-opacity"
         >
-          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-white/20 transition-colors">
-            <Copy size={14} />
-          </div>
-          <span className="text-[11px] font-medium tracking-tight">Copy</span>
+          Copy
         </button>
 
-        <div className="w-px bg-white/10" />
+        <span className="w-px bg-bg/20" aria-hidden="true" />
 
-        {/* Share */}
         <button
+          type="button"
           onClick={() => {
             onShare(selectedText);
             setPosition(null);
           }}
-          className="group flex flex-col items-center gap-1 px-5 py-3 text-white hover:bg-white/10 active:bg-white/15 transition-colors font-inter"
+          className="px-4 h-10 text-[13px] font-semibold font-inter hover:opacity-80 transition-opacity"
         >
-          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/90 group-hover:bg-white/20 transition-colors">
-            <Share2 size={14} />
-          </div>
-          <span className="text-[11px] font-medium tracking-tight">Share</span>
+          Share
         </button>
       </div>
 
-      {/* Arrow pointing down */}
+      {/* Arrow pointing down to the selection */}
       <div
-        className="absolute left-1/2 -translate-x-1/2 -bottom-[6px] w-3 h-3 bg-[#1a1a1a] rotate-45 border-r border-b border-white/10"
+        className="absolute left-1/2 -translate-x-1/2 -bottom-[4px] w-2 h-2 bg-text-primary rotate-45"
+        aria-hidden="true"
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sanityClient } from "@/lib/sanity/client";
-import { postBySlugQuery } from "@/lib/sanity/queries";
+import { postBySlugQuery, authorQuery } from "@/lib/sanity/queries";
 import { BlogPostClient } from "./blog-post-client";
 
 interface BlogPostPageProps {
@@ -81,8 +81,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
 
   let sanityPost;
+  let sanityAuthor: { name?: string; avatar?: { url?: string } } | null = null;
   try {
-    sanityPost = await sanityClient.fetch(postBySlugQuery, { slug });
+    [sanityPost, sanityAuthor] = await Promise.all([
+      sanityClient.fetch(postBySlugQuery, { slug }),
+      sanityClient.fetch(authorQuery),
+    ]);
   } catch {
     // Fetch failed
   }
@@ -100,10 +104,16 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     category: sanityPost.category || "Design",
     date: formatDate(sanityPost.publishedAt),
     readingTime: sanityPost.readingTime || "5 min read",
-    author: "mehedihas",
+    author: sanityAuthor?.name || "mehedihas",
+    authorAvatar: sanityAuthor?.avatar?.url || "",
     hasAudio: sanityPost.enableAudio || false,
     audioDuration: sanityPost.audioDuration,
     language: sanityPost.language || "BANGLA",
+    coverImage: sanityPost.coverImage?.url || "",
+    coverImageAlt: sanityPost.coverImage?.alt || "",
+    coverImageWidth: sanityPost.coverImage?.width,
+    coverImageHeight: sanityPost.coverImage?.height,
+    coverImageLqip: sanityPost.coverImage?.lqip || "",
     tocItems,
     body: sanityPost.body || [],
     plainText,

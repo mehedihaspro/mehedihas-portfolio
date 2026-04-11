@@ -16,6 +16,8 @@ interface Post {
   date: string;
   readingTime: string;
   hasAudio?: boolean;
+  coverImage?: string;
+  coverImageAlt?: string;
   coverColor?: string;
   language?: string;
 }
@@ -107,6 +109,8 @@ export function BlogPageClient({ posts, categories }: BlogPageClientProps) {
                   date={post.date}
                   readingTime={post.readingTime}
                   hasAudio={post.hasAudio}
+                  coverImage={post.coverImage}
+                  coverImageAlt={post.coverImageAlt}
                 />
                 {index < paginatedPosts.length - 1 && (
                   <Divider variant="solid" className="mt-6" />

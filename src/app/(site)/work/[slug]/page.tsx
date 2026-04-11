@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Quote } from "lucide-react";
 import { sanityClient } from "@/lib/sanity/client";
@@ -34,6 +35,8 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
   if (!project) notFound();
 
   const coverColor: string = project.coverColor || "";
+  const thumbnailUrl: string = project.thumbnail?.url || "";
+  const thumbnailAlt: string = project.thumbnail?.alt || project.title;
 
   return (
     <div className="mx-auto max-w-[820px] px-6 py-20">
@@ -64,9 +67,24 @@ export default async function WorkDetailPage({ params }: WorkDetailPageProps) {
 
       {/* ========== THUMBNAIL / COVER ========== */}
       <div
-        className="w-full aspect-[2.2/1] rounded-2xl bg-bg-subtle mb-10"
-        style={coverColor ? { backgroundColor: coverColor } : undefined}
-      />
+        className="relative w-full aspect-[2.2/1] rounded-2xl bg-bg-subtle border border-border overflow-hidden mb-10"
+        style={
+          !thumbnailUrl && coverColor
+            ? { backgroundColor: coverColor }
+            : undefined
+        }
+      >
+        {thumbnailUrl && (
+          <Image
+            src={thumbnailUrl}
+            alt={thumbnailAlt}
+            fill
+            priority
+            sizes="(max-width: 820px) 100vw, 820px"
+            className="object-cover"
+          />
+        )}
+      </div>
 
       {/* ========== OVERVIEW ========== */}
       {project.overview && (
