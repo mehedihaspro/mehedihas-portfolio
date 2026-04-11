@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Settings2, Menu, ChevronRight } from "lucide-react";
+import { X, Settings2, Menu, Focus } from "lucide-react";
 import { useTheme } from "@/components/layout/theme-provider";
 import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
@@ -9,7 +9,6 @@ const STORAGE_KEY_FONT_SIZE = "mehedihas-font-size";
 const STORAGE_KEY_LINE_HEIGHT = "mehedihas-line-height";
 const STORAGE_KEY_FOCUS = "mehedihas-focus-mode";
 const STORAGE_KEY_FONT_FAMILY = "mehedihas-font-family";
-const STORAGE_KEY_CONTENT_WIDTH = "mehedihas-content-width";
 
 const THEMES = [
   { value: "light" as const, label: "Light", swatch: "#FAF5EE" },
@@ -46,8 +45,6 @@ const FONT_SIZE_MIN = 14;
 const FONT_SIZE_MAX = 28;
 const LINE_HEIGHT_MIN = 1.4;
 const LINE_HEIGHT_MAX = 2.6;
-const CONTENT_WIDTH_MIN = 560;
-const CONTENT_WIDTH_MAX = 860;
 
 function readStored<T>(
   key: string,
@@ -87,9 +84,6 @@ export function ReadingSettings() {
       (v) => v as FontFamily
     )
   );
-  const [contentWidth, setContentWidth] = useState<number>(() =>
-    readStored(STORAGE_KEY_CONTENT_WIDTH, 720, Number)
-  );
 
   const applySettings = useCallback(() => {
     const article = document.querySelector(
@@ -102,9 +96,7 @@ export function ReadingSettings() {
 
     const fontDef = FONT_FAMILIES.find((f) => f.value === fontFamily);
     if (fontDef) article.style.fontFamily = fontDef.cssVar;
-
-    article.style.maxWidth = `${contentWidth}px`;
-  }, [fontSize, lineHeight, fontFamily, contentWidth]);
+  }, [fontSize, lineHeight, fontFamily]);
 
   // Sync focus mode state to the body class on mount + whenever it changes.
   useEffect(() => {
@@ -117,11 +109,10 @@ export function ReadingSettings() {
       localStorage.setItem(STORAGE_KEY_FONT_SIZE, String(fontSize));
       localStorage.setItem(STORAGE_KEY_LINE_HEIGHT, String(lineHeight));
       localStorage.setItem(STORAGE_KEY_FONT_FAMILY, fontFamily);
-      localStorage.setItem(STORAGE_KEY_CONTENT_WIDTH, String(contentWidth));
     } catch {
       // ignore
     }
-  }, [fontSize, lineHeight, fontFamily, contentWidth, applySettings]);
+  }, [fontSize, lineHeight, fontFamily, applySettings]);
 
   useEffect(() => {
     try {
@@ -300,26 +291,6 @@ export function ReadingSettings() {
 
               <Divider />
 
-              {/* ============ CONTENT WIDTH ============ */}
-              <section className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <SectionLabel>Content Width</SectionLabel>
-                  <span className="text-[14px] text-text-muted font-inter tabular-nums">
-                    {contentWidth}px
-                  </span>
-                </div>
-                <Slider
-                  min={CONTENT_WIDTH_MIN}
-                  max={CONTENT_WIDTH_MAX}
-                  step={10}
-                  value={contentWidth}
-                  onChange={setContentWidth}
-                  ariaLabel="Content width"
-                />
-              </section>
-
-              <Divider />
-
               {/* ============ FOCUS MODE ============ */}
               <section className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -327,7 +298,7 @@ export function ReadingSettings() {
                     className="shrink-0 w-10 h-10 rounded-full border border-border bg-bg flex items-center justify-center text-text-primary"
                     aria-hidden="true"
                   >
-                    <ChevronRight size={18} strokeWidth={1.8} />
+                    <Focus size={18} strokeWidth={1.8} />
                   </span>
                   <div className="flex flex-col min-w-0">
                     <p className="text-[14px] text-text-primary font-inter leading-tight">
