@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Hind_Siliguri, Amatic_SC, Caveat } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import "./globals.css";
 
@@ -84,6 +85,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-inter antialiased bg-bg text-text-primary">
         <ThemeProvider>{children}</ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
