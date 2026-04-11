@@ -105,32 +105,39 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
   }, [currentQuestion, currentAnswer, handleNext, handleSelect, handleDismiss]);
 
   return (
-    <QuizModalShell
-      isOpen
-      onDismiss={handleDismiss}
-      ariaLabel="Quiz"
-      preventBackdropDismiss={hasAnyAnswer}
-    >
-      {/* ============ TOP: segmented progress + close ============ */}
-      <div className="px-6 md:px-8 pt-6 pb-4 flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-1.5">
+    <QuizModalShell isOpen onDismiss={handleDismiss} ariaLabel="Quiz">
+      {/* ============ TOP: short dash progress + counter + close ============ */}
+      <div className="px-6 md:px-8 pt-6 pb-5 flex items-center gap-3">
+        <div
+          className="flex items-center gap-1.5"
+          role="progressbar"
+          aria-valuenow={currentIdx + 1}
+          aria-valuemin={1}
+          aria-valuemax={questions.length}
+          aria-label={`Question ${currentIdx + 1} of ${questions.length}`}
+        >
           {questions.map((_, idx) => {
             const filled = idx < currentIdx;
             const active = idx === currentIdx;
             return (
               <span
                 key={idx}
-                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                className={`h-1 w-8 rounded-full transition-colors duration-300 ${
                   active || filled ? "bg-amber" : "bg-bg-subtle"
                 }`}
               />
             );
           })}
         </div>
+
+        <span className="text-[12px] font-inter text-text-muted tabular-nums">
+          {currentIdx + 1} / {questions.length}
+        </span>
+
         <button
           type="button"
           onClick={handleDismiss}
-          className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-subtle transition-colors"
+          className="ml-auto shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-subtle transition-colors"
           aria-label="Close quiz"
         >
           <X size={16} />
@@ -144,17 +151,9 @@ export function QuizRunner({ questions, onComplete, onExit }: QuizRunnerProps) {
           transitioning ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0"
         }`}
       >
-        <p className="text-[13px] font-mono uppercase tracking-[0.1em] text-text-muted mb-3">
-          Q.{String(currentIdx + 1).padStart(2, "0")}
-        </p>
-
         <h2 className="text-[22px] md:text-[26px] font-bold text-text-primary leading-[1.25] tracking-[-0.01em] font-inter mb-6">
           {currentQuestion.question}
         </h2>
-
-        <p className="text-[11px] font-mono uppercase tracking-[0.1em] text-text-muted mb-3">
-          Select only 1
-        </p>
 
         {/* Options */}
         <ul className="flex flex-col gap-2.5">

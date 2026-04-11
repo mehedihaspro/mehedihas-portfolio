@@ -7,8 +7,6 @@ interface QuizModalShellProps {
   isOpen: boolean;
   onDismiss: () => void;
   ariaLabel: string;
-  /** When true, clicking the backdrop is ignored. Used while a quiz is in progress. */
-  preventBackdropDismiss?: boolean;
   children: ReactNode;
 }
 
@@ -21,7 +19,6 @@ export function QuizModalShell({
   isOpen,
   onDismiss,
   ariaLabel,
-  preventBackdropDismiss = false,
   children,
 }: QuizModalShellProps) {
   // Track mount so SSR doesn't try to portal
@@ -69,15 +66,12 @@ export function QuizModalShell({
         zIndex: 1100,
       }}
     >
-      {/* Backdrop */}
-      <button
-        type="button"
-        aria-label="Dismiss"
-        tabIndex={-1}
-        onClick={() => {
-          if (!preventBackdropDismiss) onDismiss();
-        }}
-        className="absolute inset-0 bg-black/55 backdrop-blur-sm animate-in fade-in duration-200 cursor-default"
+      {/* Backdrop — decorative only. The quiz never dismisses on backdrop
+          click; users must use the X button or Esc key. This prevents
+          accidental loss of an in-progress quiz. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-black/55 backdrop-blur-sm animate-in fade-in duration-200 pointer-events-none"
       />
 
       {/* Stacked card hint (decorative, sits behind the active card) */}

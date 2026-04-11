@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { X, Settings2, Menu, Focus } from "lucide-react";
+import {
+  X,
+  Menu,
+  Focus,
+  Sun,
+  BookOpen,
+  Moon,
+  Eclipse,
+  type LucideIcon,
+} from "lucide-react";
 import { useTheme } from "@/components/layout/theme-provider";
 import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
@@ -10,11 +19,20 @@ const STORAGE_KEY_LINE_HEIGHT = "mehedihas-line-height";
 const STORAGE_KEY_FOCUS = "mehedihas-focus-mode";
 const STORAGE_KEY_FONT_FAMILY = "mehedihas-font-family";
 
-const THEMES = [
-  { value: "light" as const, label: "Light", swatch: "#FAF5EE" },
-  { value: "sepia" as const, label: "Sepia", swatch: "#F4EADB" },
-  { value: "dark" as const, label: "Dark", swatch: "#1C1C1E" },
-  { value: "night" as const, label: "Night", swatch: "#000000" },
+type ThemeValue = "light" | "sepia" | "dark" | "night";
+
+interface ThemeDef {
+  value: ThemeValue;
+  label: string;
+  swatch: string;
+  Icon: LucideIcon;
+}
+
+const THEMES: ThemeDef[] = [
+  { value: "light", label: "Light", swatch: "#FAF5EE", Icon: Sun },
+  { value: "sepia", label: "Sepia", swatch: "#F4EADB", Icon: BookOpen },
+  { value: "dark", label: "Dark", swatch: "#1C1C1E", Icon: Moon },
+  { value: "night", label: "Night", swatch: "#000000", Icon: Eclipse },
 ];
 
 const FONT_FAMILIES = [
@@ -123,27 +141,32 @@ export function ReadingSettings() {
   }, [focusMode]);
 
   const shouldHide = isNearFooter && !isOpen;
+  const currentTheme = THEMES.find((t) => t.value === theme) || THEMES[0];
+  const CurrentThemeIcon = currentTheme.Icon;
 
   return (
     <>
-      {/* Floating action button */}
+      {/* Floating action button — shows the current theme icon as the affordance */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[997] w-12 h-12 rounded-full bg-bg-card flex items-center justify-center text-text-primary hover:text-amber transition-all duration-300 hover:scale-105 ${
+        className={`fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[997] w-14 h-14 rounded-full bg-bg-card border border-border flex items-center justify-center text-text-primary hover:text-amber transition-all duration-300 hover:scale-105 ${
           shouldHide
             ? "opacity-0 translate-y-6 pointer-events-none"
             : "opacity-100 translate-y-0"
         }`}
-        aria-label="Reading settings"
+        aria-label={`Reading settings (current theme: ${currentTheme.label})`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         style={{
-          boxShadow:
-            "0 8px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
         }}
       >
-        {isOpen ? <X size={17} /> : <Settings2 size={17} strokeWidth={1.8} />}
+        {isOpen ? (
+          <X size={20} strokeWidth={1.8} />
+        ) : (
+          <CurrentThemeIcon size={20} strokeWidth={1.8} />
+        )}
       </button>
 
       {/* Settings panel */}

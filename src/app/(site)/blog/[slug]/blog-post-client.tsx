@@ -125,7 +125,6 @@ export function BlogPostClient({ post }: BlogPostClientProps) {
           <Breadcrumb
             items={[
               { label: "Blog", href: "/blog" },
-              { label: post.category },
             ]}
           />
         </div>

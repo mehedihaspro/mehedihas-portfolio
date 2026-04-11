@@ -35,15 +35,20 @@ export function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
               className="text-text-muted/60 shrink-0"
               strokeWidth={2}
             />
-            {item.href && !isLast ? (
+            {item.href ? (
+              // Items with href always render as links, regardless of position.
+              // "You are here" styling (amber) only applies to the label-only
+              // last item.
               <Link
                 href={item.href}
+                aria-current={isLast ? "page" : undefined}
                 className="text-[12px] font-medium text-text-secondary hover:text-amber transition-colors font-inter whitespace-nowrap"
               >
                 {item.label}
               </Link>
             ) : (
               <span
+                aria-current={isLast ? "page" : undefined}
                 className={`text-[12px] font-semibold whitespace-nowrap font-inter ${
                   isLast ? "text-amber" : "text-text-secondary"
                 }`}

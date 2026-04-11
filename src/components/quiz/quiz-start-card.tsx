@@ -1,6 +1,6 @@
 "use client";
 
-import { Brain, Clock, HelpCircle, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface QuizStartCardProps {
@@ -20,46 +20,24 @@ export function QuizStartCard({
 
   return (
     <div className="max-w-[680px] mx-auto mt-16 mb-16 pt-12 border-t border-border">
-      {/* Section label */}
-      <div className="flex items-center gap-2 mb-6">
+      {/* Section label with meta inline — replaces the brain-icon top row */}
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
         <div className="w-3.5 h-0.5 bg-amber rounded-full" />
         <h4 className="text-[14px] font-bold uppercase tracking-[1.5px] text-text-muted font-inter">
           End of article quiz
         </h4>
+        <span className="text-text-muted/50 font-inter text-[14px]">·</span>
+        <span className="text-[12px] text-text-muted font-inter tabular-nums">
+          {questionCount} {questionCount === 1 ? "question" : "questions"}
+        </span>
+        <span className="text-text-muted/50 font-inter text-[14px]">·</span>
+        <span className="text-[12px] text-text-muted font-inter">
+          ~{estimatedMinutes} min
+        </span>
       </div>
 
       {/* Card */}
       <div className="rounded-[14px] border border-border bg-bg-card p-7 md:p-10">
-        {/* Top row: brain icon + meta */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="w-12 h-12 rounded-full bg-highlight-bg flex items-center justify-center">
-            <Brain size={22} className="text-amber" strokeWidth={1.8} />
-          </div>
-
-          <div className="flex items-center gap-3 text-[12px] text-text-muted font-inter">
-            <span className="inline-flex items-center gap-1.5">
-              <HelpCircle size={12} />
-              <span>
-                <span className="font-semibold text-text-primary">
-                  {questionCount}
-                </span>{" "}
-                {questionCount === 1 ? "question" : "questions"}
-              </span>
-            </span>
-            <span className="w-1 h-1 rounded-full bg-text-muted/60" />
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={12} />~{estimatedMinutes} min
-            </span>
-          </div>
-        </div>
-
-        {/* Tag */}
-        <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-bg-subtle mb-4">
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted font-inter">
-            Optional · Randomized
-          </span>
-        </div>
-
         {/* Title */}
         <h3 className="text-[26px] md:text-[32px] font-bold leading-[1.15] tracking-[-0.01em] text-text-primary font-inter mb-4">
           {title}
