@@ -43,17 +43,19 @@ export function LanguageFilter({
   const hasAnyFilter = activeLanguage !== "ALL" || hasActiveCategory;
 
   return (
-    <div className="flex items-center justify-between w-full gap-4">
-      {/* Left: Language pills */}
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-3 sm:gap-4">
+      {/* Left: Language pills — wrap gracefully on very narrow screens */}
       <div className="flex items-center gap-2 flex-wrap">
         {languages.map((lang) => (
           <button
             key={lang}
+            type="button"
             onClick={() => onLanguageSelect(lang)}
-            className={`px-6 py-4 rounded-full border text-[16px] font-normal leading-[24px] transition-all duration-200 font-inter ${
+            aria-pressed={activeLanguage === lang}
+            className={`h-11 px-4 md:px-5 rounded-full border text-[13px] md:text-[14px] font-semibold font-inter transition-colors ${
               activeLanguage === lang
-                ? "bg-amber border-border text-text-primary"
-                : "bg-bg border-border text-text-secondary hover:bg-bg-subtle"
+                ? "bg-highlight-bg border-amber text-amber"
+                : "bg-bg border-border text-text-secondary hover:bg-bg-subtle hover:text-text-primary"
             }`}
           >
             {lang}
@@ -61,21 +63,23 @@ export function LanguageFilter({
         ))}
       </div>
 
-      {/* Right: Article count + filter button */}
-      <div className="flex items-center gap-4 shrink-0">
+      {/* Right: Article count + filter button. On mobile this sits on its
+          own row, with the count pushed left and the filter button right. */}
+      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0">
         {/* Article count + active filter chip */}
-        <div className="flex items-center gap-2">
-          <p className="text-[13px] text-text-muted font-inter">
+        <div className="flex items-center gap-2 min-w-0">
+          <p className="text-[13px] text-text-muted font-inter tabular-nums whitespace-nowrap">
             <span className="font-semibold text-text-primary">{postCount}</span>{" "}
             article{postCount !== 1 ? "s" : ""}
           </p>
           {hasAnyFilter && (
             <button
+              type="button"
               onClick={() => {
                 onLanguageSelect("ALL");
                 onCategorySelect(null);
               }}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-highlight-bg text-[11px] font-medium text-amber hover:bg-amber/20 transition-colors font-inter"
+              className="flex items-center gap-1 px-2.5 h-6 rounded-full bg-highlight-bg text-[11px] font-semibold text-amber hover:bg-amber/20 transition-colors font-inter"
               aria-label="Clear filters"
             >
               <span>Clear</span>
@@ -87,8 +91,9 @@ export function LanguageFilter({
         {/* Filter dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
+            type="button"
             onClick={() => setShowDropdown(!showDropdown)}
-            className={`w-[72px] h-[56px] flex items-center justify-center rounded-full border transition-all duration-200 relative ${
+            className={`w-11 h-11 flex items-center justify-center rounded-full border transition-colors relative ${
               hasActiveCategory
                 ? "border-amber bg-highlight-bg"
                 : showDropdown
@@ -97,20 +102,25 @@ export function LanguageFilter({
             }`}
             aria-label="Filter by category"
             aria-expanded={showDropdown}
+            aria-haspopup="menu"
           >
             <SlidersHorizontal
-              size={24}
+              size={18}
               className={hasActiveCategory ? "text-amber" : "text-text-primary"}
             />
             {hasActiveCategory && (
-              <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-amber" />
+              <span
+                className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber"
+                aria-hidden="true"
+              />
             )}
           </button>
 
-          {/* Dropdown panel — more spacious and beautiful */}
+          {/* Dropdown panel — clamped so it doesn't overflow on mobile */}
           {showDropdown && (
             <div
-              className="absolute right-0 top-full mt-3 z-50 w-[320px] rounded-[18px] border border-border bg-bg shadow-xl overflow-hidden"
+              className="absolute right-0 top-full mt-3 z-50 w-[min(320px,calc(100vw-2rem))] rounded-[18px] border border-border bg-bg overflow-hidden"
+              role="menu"
               style={{
                 boxShadow:
                   "0 20px 50px -12px rgba(0, 0, 0, 0.12), 0 8px 20px -8px rgba(0, 0, 0, 0.08)",
